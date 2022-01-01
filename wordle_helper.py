@@ -20,7 +20,7 @@ def existsInWordList(word):
     return False
     
 class WordleHelper:
-    def __init__(self, positionalLetters: list, exisitingLetters: str, wordLength: int, possibleLetters: str):
+    def __init__(self, positionalLetters: list, exisitingLetters: str, wordLength: int, possibleLetters: str, notPositionalLetters: list):
         self.allPossibleWords = []
         self.meaningfulWords = []
         self.meaningNotFoundWords = []
@@ -30,6 +30,7 @@ class WordleHelper:
         self.wordLength = wordLength
         self.possibleLetters = possibleLetters
         self.backtrackCount = 0
+        self.notPositionalLetters = notPositionalLetters
 
     def __buildDictFromWord(self, letters: Union[list, str]) -> dict:
         """
@@ -71,6 +72,10 @@ class WordleHelper:
                     self.__addWordToLists(word)
             return
         for letter in self.probableLetters:
+            # check if the letter is not in that position
+            if letter in self.notPositionalLetters[idx-1]:
+                continue
+            # check if letter exists in exact position
             if wordAsDict[idx-1] is not None:
                 self.__backtrackAllWords(idx - 1, wordAsDict)
                 return
@@ -123,11 +128,12 @@ class WordleHelper:
         print(f"\nMeaningful word, but meaning not found: {self.meaningNotFoundWords}\n")
 
 if __name__ == '__main__':
-    positionalLetters = [None, None, 'c', None, None]
-    exisitingLetters = 're'
+    positionalLetters = [None, None, None, None, None]
+    exisitingLetters = 'reu'
     wordLength = 5
-    possibleLetters = 'ulon'
+    possibleLetters = 'qwtyiosfghjkzxvbm'
+    notPositionalLetters = [['u'], ['u', 'r'], ['r'], ['e'], ['r', 'e']]
 
-    wordleHelper = WordleHelper(positionalLetters, exisitingLetters, wordLength, possibleLetters)
+    wordleHelper = WordleHelper(positionalLetters, exisitingLetters, wordLength, possibleLetters, notPositionalLetters)
     wordleHelper.buildAllWords()
     wordleHelper.printAllWords()
