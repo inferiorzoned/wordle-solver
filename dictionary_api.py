@@ -1,13 +1,6 @@
 import requests
 
-API_ENDPOINT = "https://api.dictionaryapi.dev/api/v2/entries/en/"
-
-# word = "chaos"
-# Get the meanings of the word from api_endpoint
-# response = requests.get(api_endpoint + word)
-# print(response.json()[0]["meanings"][0]["definitions"][0]["definition"])
-
-# sample response to request 
+# sample response to request to the api endpoint
 '''
 [
    {
@@ -80,7 +73,7 @@ API_ENDPOINT = "https://api.dictionaryapi.dev/api/v2/entries/en/"
 
 class DictionaryAPI:
     def __init__(self):
-        pass
+        self.API_ENDPOINT = "https://api.dictionaryapi.dev/api/v2/entries/en/"
     
     def __flatten_2d_list(self, list_2d: list) -> list:
         """
@@ -116,7 +109,7 @@ class DictionaryAPI:
         :param show_antonyms: whether to show antonyms
         :return: list of meanings of the word
         """
-        response = requests.get(API_ENDPOINT + word)
+        response = requests.get(self.API_ENDPOINT + word)
         if response.status_code == 200:
             all_meanings = response.json()[0]["meanings"]
             definitions = self.__get_items("definitions", all_meanings)
@@ -145,15 +138,10 @@ class DictionaryAPI:
             # print("Word not found")
             return None
 
-# meanings = find_meaning("damn", show_synonyms = True, show_antonyms = True)
-# for meaning in meanings:
-#     print(meaning)
-# print(meanings)
-
 if __name__ == "__main__":
     myDict = DictionaryAPI()
     word = "plane"
-    meanings = myDict.find_meaning(word, show_examples = True, show_synonyms = False, show_antonyms = False)
+    meanings = myDict.find_meaning(word, show_synonyms = True)
     for meaning in meanings:
         print(meaning)
     
