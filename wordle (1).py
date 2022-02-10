@@ -1,6 +1,8 @@
-import enchant
-import pyttsx3
-from PyDictionary import PyDictionary
+# import enchant
+# import pyttsx3
+# from PyDictionary import PyDictionary
+
+from dictionary_api import DictionaryAPI
 
 class Speaking:
  
@@ -23,9 +25,9 @@ class wordle:
         self.ache = ache
         self.probable = probable
         self.words = []
+        
 
     
-      
     def findWordSuffix(self):    #use this function when you know the suffix of the word
         # ache = 'ack'
         # probable = 'sacktypdfjzxm'
@@ -72,15 +74,24 @@ class wordle:
                 for state in meaning:
                     print(meaning[state])
                     speak.speak("the meaning  is" + str(meaning[state]))
-
         
-        
-         
         # Taking the string input
         
-       
-
-
+    def isValidWord(self, word: str, verbose = True) -> bool:
+        """
+        check if the word is valid using DictionaryAPI
+        """
+        myDict = DictionaryAPI()
+        wordMeaning = myDict.find_meaning(word)
+        if not wordMeaning:
+            return False
+        if verbose:
+            print(word.upper())
+            for meaning in wordMeaning:
+                if type(meaning) == dict:
+                    for key in meaning:
+                        print(f"{key}: {meaning[key]}")
+        return True
     
 
 # this code works if exactly two letter is unknown :P
@@ -90,7 +101,8 @@ if __name__ == '__main__':
     probable = input('Enter the probable letters: ')
     wordle = wordle(ache, probable)
     wordle.findWordSuffix()
-    wordle.checkWordValidity()
+    # wordle.checkWordValidity()
+    wordle.isValidWord("milf")
 
 
 
