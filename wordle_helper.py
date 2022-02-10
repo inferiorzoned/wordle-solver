@@ -102,7 +102,7 @@ if __name__ == '__main__':
     wordle = wordle(ache, probable)
     wordle.findWordSuffix()
     # wordle.checkWordValidity()
-    wordle.isValidWord("milf")
+    wordle.isValidWord("help")
 
 
 
