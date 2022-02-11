@@ -1,27 +1,12 @@
-# import enchant
-# import pyttsx3
-# from PyDictionary import PyDictionary
-
 from dictionary_api import DictionaryAPI
 from typing import Union
 
-class Speaking:
- 
-    def speak(self, audio):
-        # Having the initial constructor of pyttsx3
-        # and having the sapi5 in it as a parameter
-        engine = pyttsx3.init('sapi5')
-         
-        # Calling the getter and setter of pyttsx3
-        voices = engine.getProperty('voices')
-         
-        # Method for the speaking of the the assistant
-        engine.setProperty('voice', voices[0].id)
-        engine.say(audio)
-        engine.runAndWait()
-
 def existsInWordList(word):
-    allWordsSorted = open("allWords.txt").read().splitlines()
+    """
+    Check whether the word exists in sorted allFiveLetterWords list
+    """
+    word = word.lower()
+    allWordsSorted = open("allFiveLetterWords.txt").read().splitlines()
     lo = 0
     hi = len(allWordsSorted) - 1
     while lo <= hi:
@@ -34,8 +19,7 @@ def existsInWordList(word):
             hi = mid - 1
     return False
     
-
-class wordle:
+class WordleHelper:
     def __init__(self, positionalLetters: list, exisitingLetters: str, wordLength: int, possibleLetters: str):
         self.allPossibleWords = []
         self.meaningfulWords = []
@@ -138,68 +122,12 @@ class wordle:
         print(f"\nMeaningful words: \n{self.meaningfulWords}")
         print(f"\nMeaningful word, but meaning not found: {self.meaningNotFoundWords}\n")
 
-    """
-    def findWordSuffix(self):    #use this function when you know the suffix of the word
-        # ache = 'ack'
-        # probable = 'sacktypdfjzxm'
-
-        for i in self.probable:
-            for j in self.probable:
-                print( i + j + self.ache)
-                self.words.append( i + j + self.ache)
-                
-            print('\n')
-
-    def findWordPrefix(self):    #use this function when you know the prefix of the word
-        
-        for i in self.probable:
-            for j in self.probable:
-                print(self.ache + i + j)
-                self.words.append(self.ache + i + j)
-            print('\n')
-    
-    def checkWordValidity(self):
-        d1 = enchant.Dict("en_US")
-        d2 = enchant.Dict("en_GB")
-
-        speak = Speaking()
-        dic = PyDictionary()
-        speak.speak("Which word do u want to find the meaning of?")
-
-        for i in self.words:
-            if d1.check(i) == True:
-                print(i, 'is a valid English word')
-
-                meaning = dic.meaning(i)
-                print(len(meaning))
-         
-                for state in meaning:
-                    print(meaning[state])
-                    speak.speak("the meaning  is" + str(meaning[state]))
-            elif d2.check(i) == True:
-                print(i, 'is a valid British word')
-                
-                meaning = dic.meaning(i)
-                print(len(meaning))
-         
-                for state in meaning:
-                    print(meaning[state])
-                    speak.speak("the meaning  is" + str(meaning[state]))
-        
-    """ 
-    
-# this code works if exactly two letter is unknown :P
-
 if __name__ == '__main__':
     positionalLetters = [None, None, 'c', None, None]
     exisitingLetters = 're'
     wordLength = 5
     possibleLetters = 'ulon'
-    wordle = wordle(positionalLetters, exisitingLetters="re", wordLength= 5, possibleLetters="ulon")
-    wordle.buildAllWords()
-    wordle.printAllWords()
 
-
-
-
-        
+    wordleHelper = WordleHelper(positionalLetters, exisitingLetters, wordLength, possibleLetters)
+    wordleHelper.buildAllWords()
+    wordleHelper.printAllWords()
