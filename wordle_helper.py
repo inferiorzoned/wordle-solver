@@ -26,48 +26,52 @@ class wordle:
         self.ache = ache
         self.probable = probable
         self.words = []
+        self.meaningfulWords = []
         self.myWord = self.__buildDictFromWord(positionalLetters)
         self.existingLetters = exisitingLetters
         self.wordLength = wordLength
         self.possibleLetters = possibleLetters
         self.backtrackCount = 0
 
-    def __backtrackAllWords(self, wordAsDict) -> bool:
-        """
-        backtrack to get all possible words
-        """
+    def __backtrackAllWords(self, idx: int, wordAsDict: Union[dict , str]):
         self.backtrackCount += 1
-        word = self.__buildWordFromDict(wordAsDict)
-        print(self.backtrackCount, word)
-        # if word:
-        #     if self.isValidWord(word):
-        #         self.words.append(word.upper())
-        
-        for i in range(self.wordLength):
-            if wordAsDict[i] == None:
-                for letter in self.probableLetters:
-                    wordAsDict[i] = letter
-                    # word = self.__buildWordFromDict(wordAsDict)
-                    # if word:
-                    #     if self.isValidWord(word):
-                    #         self.words.append(word)
-                    if self.__backtrackAllWords(wordAsDict):
-                        return True
-                    wordAsDict[i] = None
-        return False
+        # print(self.backtrackCount, wordAsDict)
+        if idx == 0:
+            # print(self.backtrackCount, wordAsDict)
+            word = self.__buildWordFromDict(wordAsDict)
+            if word:
+                # check if word contains all of the letter in self.existingLetters
+                if all(letter in word for letter in self.existingLetters):
+                    print(word)
+                    self.words.append(word)
+                    if self.isValidWord(word):
+                        self.meaningfulWords.append(word)
+                        print(f"{word} is a meaningful word")
+            return
+        for letter in self.probableLetters:
+            if wordAsDict[idx-1] is not None:
+                self.__backtrackAllWords(idx - 1, wordAsDict)
+                return
+            wordAsDict[idx-1] = letter
+            self.__backtrackAllWords(idx - 1, wordAsDict)
+            wordAsDict[idx-1] = None
+
 
     def buildAllWords(self):
         """
         build all the words by calling backtrackAllWords
         """
         self.probableLetters = self.existingLetters + self.possibleLetters
-        self.__backtrackAllWords(self.myWord)
+        self.__backtrackAllWords(self.wordLength, self.myWord)
+        # self.__backtrackAllWords(self.wordLength, "")
+        # self.__backtrackAllWords()
     
     def printAllWords(self):
         """
         print all the words
         """
         print(self.words)
+        print(f"meaningful words: {self.meaningfulWords}")
 
     def __buildDictFromWord(self, letters: Union[list, str]) -> dict:
         """
