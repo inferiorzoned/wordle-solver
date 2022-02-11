@@ -2,7 +2,6 @@
 # import pyttsx3
 # from PyDictionary import PyDictionary
 
-from sympy import true
 from dictionary_api import DictionaryAPI
 from typing import Union
 
@@ -37,12 +36,11 @@ def existsInWordList(word):
     
 
 class wordle:
-    def __init__(self, ache, probable, positionalLetters: list, exisitingLetters: str, wordLength: int, possibleLetters: str):
-        self.ache = ache
-        self.probable = probable
+    def __init__(self, positionalLetters: list, exisitingLetters: str, wordLength: int, possibleLetters: str):
         self.allPossibleWords = []
         self.meaningfulWords = []
         self.meaningNotFoundWords = []
+        self.listedWords = []
         self.myWord = self.__buildDictFromWord(positionalLetters)
         self.existingLetters = exisitingLetters
         self.wordLength = wordLength
@@ -73,14 +71,13 @@ class wordle:
         """
         self.allPossibleWords.append(word)
         if existsInWordList(word):
-            if self.isValidWord(word):
-                self.meaningfulWords.append(word.upper())
-                # print(f"{word} is a meaningful word")
-            else:
-                self.meaningNotFoundWords.append(word.upper())
-                # print(f"{word} is not a meaningful word")
+            print(word)
+            self.listedWords.append(word)
 
     def __backtrackAllWords(self, idx: int, wordAsDict: Union[dict , str]):
+        """
+        backtrack to generate all the words from probableLetters
+        """
         self.backtrackCount += 1
         if idx == 0:
             word = self.__buildWordFromDict(wordAsDict)
@@ -97,6 +94,33 @@ class wordle:
             self.__backtrackAllWords(idx - 1, wordAsDict)
             wordAsDict[idx-1] = None
 
+    def isMeaningfulWord(self, word: str, verbose = True) -> bool:
+        """
+        check if the word is Meaningful using DictionaryAPI
+        """
+        myDict = DictionaryAPI()
+        wordMeaning = myDict.find_meaning(word)
+        if not wordMeaning:
+            return False
+        if verbose:
+            print("\n" + word.upper())
+            for meaning in wordMeaning:
+                if type(meaning) == dict:
+                    for key in meaning:
+                        print(f"{key}: {meaning[key]}")
+        return True
+
+    def __generateMeaningfulWords(self):
+        """
+        generate the meaningful words
+        """
+        for word in self.listedWords:
+            if self.isMeaningfulWord(word):
+                self.meaningfulWords.append(word.upper())
+                # print(f"{word} is a meaningful word")
+            else:
+                self.meaningNotFoundWords.append(word.upper())
+                # print(f"{word} is not a meaningful word")
 
     def buildAllWords(self):
         """
@@ -104,16 +128,15 @@ class wordle:
         """
         self.probableLetters = self.existingLetters + self.possibleLetters
         self.__backtrackAllWords(self.wordLength, self.myWord)
-        # self.__backtrackAllWords(self.wordLength, "")
-        # self.__backtrackAllWords()
     
     def printAllWords(self):
         """
         print all the words
         """
+        self.__generateMeaningfulWords()
         print(f"\nNumber of all possible words : {len(self.allPossibleWords)}")
         print(f"\nMeaningful words: \n{self.meaningfulWords}")
-        print(f"\nMeaningful word, but meaning not found: {self.meaningNotFoundWords}")
+        print(f"\nMeaningful word, but meaning not found: {self.meaningNotFoundWords}\n")
 
     """
     def findWordSuffix(self):    #use this function when you know the suffix of the word
@@ -164,37 +187,17 @@ class wordle:
                     speak.speak("the meaning  is" + str(meaning[state]))
         
     """ 
-        
-    def isValidWord(self, word: str, verbose = True) -> bool:
-        """
-        check if the word is valid using DictionaryAPI
-        """
-        myDict = DictionaryAPI()
-        wordMeaning = myDict.find_meaning(word)
-        if not wordMeaning:
-            return False
-        if verbose:
-            print("\n" + word.upper())
-            for meaning in wordMeaning:
-                if type(meaning) == dict:
-                    for key in meaning:
-                        print(f"{key}: {meaning[key]}")
-        return True
     
 # this code works if exactly two letter is unknown :P
 
 if __name__ == '__main__':
-    # ache = input('Enter the exact positional letters: ')
-    # probable = input('Enter the probable letters: ')
-    ache = "ack"
-    probable = "sacktypdfjzxm"
     positionalLetters = [None, None, 'c', None, None]
-    wordle = wordle(ache, probable, positionalLetters, exisitingLetters="re", wordLength= 5, possibleLetters="ulon")
+    exisitingLetters = 're'
+    wordLength = 5
+    possibleLetters = 'ulon'
+    wordle = wordle(positionalLetters, exisitingLetters="re", wordLength= 5, possibleLetters="ulon")
     wordle.buildAllWords()
     wordle.printAllWords()
-
-    # wordle.findWordSuffix()
-    # wordle.checkWordValidity()
 
 
 
