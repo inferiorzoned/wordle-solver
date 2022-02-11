@@ -85,11 +85,11 @@ class DictionaryAPI:
         """
         Returns a list of items of type item_type from container
         """
-        # check if item_type exists
-        if item_type in container[0]:
-            return list(map(lambda item: item[str(item_type)] , container))
-        else:
-            return []
+        # check item_type is a key for all items in container, if not, create an empty item
+        for item in container:
+            if item_type not in item:
+                item[item_type] = "N/A"
+        return list(map(lambda item: item[str(item_type)] , container))
 
     def __add_collections_to_dict(self, dict: dict, item_name: str, container: any) -> list:
         """
@@ -140,7 +140,7 @@ class DictionaryAPI:
 
 if __name__ == "__main__":
     myDict = DictionaryAPI()
-    word = "plane"
+    word = "oncer"
     meanings = myDict.find_meaning(word, show_synonyms = True)
     for meaning in meanings:
         print(meaning)

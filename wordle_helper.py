@@ -21,32 +21,73 @@ class Speaking:
         engine.say(audio)
         engine.runAndWait()
 
+def existsInWordList(word):
+    allWordsSorted = open("allWords.txt").read().splitlines()
+    lo = 0
+    hi = len(allWordsSorted) - 1
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        if allWordsSorted[mid] == word:
+            return True
+        elif allWordsSorted[mid] < word:
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return False
+    
+
 class wordle:
     def __init__(self, ache, probable, positionalLetters: list, exisitingLetters: str, wordLength: int, possibleLetters: str):
         self.ache = ache
         self.probable = probable
-        self.words = []
+        self.allPossibleWords = []
         self.meaningfulWords = []
+        self.meaningNotFoundWords = []
         self.myWord = self.__buildDictFromWord(positionalLetters)
         self.existingLetters = exisitingLetters
         self.wordLength = wordLength
         self.possibleLetters = possibleLetters
         self.backtrackCount = 0
 
+    def __buildDictFromWord(self, letters: Union[list, str]) -> dict:
+        """
+        Returns a dictionary of index to letters
+        """
+        return {i: letters[i] for i in range(len(letters))}
+
+    def __buildWordFromDict(self, word: str) -> str:
+        """
+        Build a word from myWord dict
+        """
+        word = ""
+        for i in self.myWord:
+            # check if the letter is alphabetical
+            if not self.myWord[i]:
+                return None
+            word += self.myWord[i]
+        return word
+
+    def __addWordToLists(self, word: str):
+        """
+        add the word to the both the lists(allPossibleWords, meaningfulWords, meaningNotFOundWords)
+        """
+        self.allPossibleWords.append(word)
+        if existsInWordList(word):
+            if self.isValidWord(word):
+                self.meaningfulWords.append(word.upper())
+                # print(f"{word} is a meaningful word")
+            else:
+                self.meaningNotFoundWords.append(word.upper())
+                # print(f"{word} is not a meaningful word")
+
     def __backtrackAllWords(self, idx: int, wordAsDict: Union[dict , str]):
         self.backtrackCount += 1
-        # print(self.backtrackCount, wordAsDict)
         if idx == 0:
-            # print(self.backtrackCount, wordAsDict)
             word = self.__buildWordFromDict(wordAsDict)
             if word:
                 # check if word contains all of the letter in self.existingLetters
                 if all(letter in word for letter in self.existingLetters):
-                    print(word)
-                    self.words.append(word)
-                    if self.isValidWord(word):
-                        self.meaningfulWords.append(word)
-                        print(f"{word} is a meaningful word")
+                    self.__addWordToLists(word)
             return
         for letter in self.probableLetters:
             if wordAsDict[idx-1] is not None:
@@ -70,29 +111,11 @@ class wordle:
         """
         print all the words
         """
-        print(self.words)
-        print(f"meaningful words: {self.meaningfulWords}")
+        print(f"\nNumber of all possible words : {len(self.allPossibleWords)}")
+        print(f"\nMeaningful words: \n{self.meaningfulWords}")
+        print(f"\nMeaningful word, but meaning not found: {self.meaningNotFoundWords}")
 
-    def __buildDictFromWord(self, letters: Union[list, str]) -> dict:
-        """
-        Returns a dictionary of index to letters
-        """
-        return {i: letters[i] for i in range(len(letters))}
-
-    def __buildWordFromDict(self, word: str) -> str:
-        """
-        Build a word from myWord dict
-        """
-        word = ""
-        for i in self.myWord:
-            # check if the letter is alphabetical
-            if not self.myWord[i]:
-                return None
-            word += self.myWord[i]
-        return word
-
-
-    
+    """
     def findWordSuffix(self):    #use this function when you know the suffix of the word
         # ache = 'ack'
         # probable = 'sacktypdfjzxm'
@@ -111,7 +134,7 @@ class wordle:
                 print(self.ache + i + j)
                 self.words.append(self.ache + i + j)
             print('\n')
-    """
+    
     def checkWordValidity(self):
         d1 = enchant.Dict("en_US")
         d2 = enchant.Dict("en_GB")
@@ -151,12 +174,11 @@ class wordle:
         if not wordMeaning:
             return False
         if verbose:
-            print(word.upper())
+            print("\n" + word.upper())
             for meaning in wordMeaning:
                 if type(meaning) == dict:
                     for key in meaning:
                         print(f"{key}: {meaning[key]}")
-            print()
         return True
     
 # this code works if exactly two letter is unknown :P
@@ -173,8 +195,6 @@ if __name__ == '__main__':
 
     # wordle.findWordSuffix()
     # wordle.checkWordValidity()
-
-    # wordle.isValidWord("help")
 
 
 
