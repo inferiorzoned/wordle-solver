@@ -1,3 +1,4 @@
+from tabnanny import verbose
 from dictionary_api import DictionaryAPI
 from typing import Union
 
@@ -18,6 +19,25 @@ def existsInWordList(word):
         else:
             hi = mid - 1
     return False
+
+def isMeaningfulWord(word: str, verbose = True) -> bool:
+    """
+    check if the word is Meaningful using DictionaryAPI
+    :param word: word to check
+    :param verbose: print out the result (default: True)
+    :return: True if the word is found in DictionaryAPI, False otherwise
+    """
+    myDict = DictionaryAPI()
+    wordMeaning = myDict.find_meaning(word)
+    if not wordMeaning:
+        return False
+    if verbose:
+        print("\n" + word.upper())
+        for meaning in wordMeaning:
+            if type(meaning) == dict:
+                for key in meaning:
+                    print(f"{key}: {meaning[key]}")
+    return True
     
 class WordleHelper:
     def __init__(self, positionalLetters: list, exisitingLetters: str, wordLength: int, possibleLetters: str, notPositionalLetters: list):
@@ -38,16 +58,16 @@ class WordleHelper:
         """
         return {i: letters[i] for i in range(len(letters))}
 
-    def __buildWordFromDict(self, word: str) -> str:
+    def __buildWordFromDict(self, wordAsDict: dict) -> str:
         """
         Build a word from myWord dict
         """
         word = ""
-        for i in self.myWord:
+        for i in wordAsDict:
             # check if the letter is alphabetical
-            if not self.myWord[i]:
+            if not wordAsDict[i]:
                 return None
-            word += self.myWord[i]
+            word += wordAsDict[i]
         return word
 
     def __addWordToLists(self, word: str):
@@ -75,7 +95,7 @@ class WordleHelper:
             # check if the letter is not in that position
             if letter in self.notPositionalLetters[idx-1]:
                 continue
-            # check if letter exists in exact position
+            # check if a letter already exists in that position
             if wordAsDict[idx-1] is not None:
                 self.__backtrackAllWords(idx - 1, wordAsDict)
                 return
@@ -83,28 +103,12 @@ class WordleHelper:
             self.__backtrackAllWords(idx - 1, wordAsDict)
             wordAsDict[idx-1] = None
 
-    def isMeaningfulWord(self, word: str, verbose = True) -> bool:
-        """
-        check if the word is Meaningful using DictionaryAPI
-        """
-        myDict = DictionaryAPI()
-        wordMeaning = myDict.find_meaning(word)
-        if not wordMeaning:
-            return False
-        if verbose:
-            print("\n" + word.upper())
-            for meaning in wordMeaning:
-                if type(meaning) == dict:
-                    for key in meaning:
-                        print(f"{key}: {meaning[key]}")
-        return True
-
     def __generateMeaningfulWords(self):
         """
         generate the meaningful words
         """
         for word in self.listedWords:
-            if self.isMeaningfulWord(word):
+            if isMeaningfulWord(word, verbose = True):
                 self.meaningfulWords.append(word.upper())
                 # print(f"{word} is a meaningful word")
             else:
@@ -124,15 +128,15 @@ class WordleHelper:
         """
         self.__generateMeaningfulWords()
         print(f"\nNumber of all possible words : {len(self.allPossibleWords)}")
-        print(f"\nMeaningful words: \n{self.meaningfulWords}")
-        print(f"\nMeaningful word, but meaning not found: {self.meaningNotFoundWords}\n")
+        print(f"\nMeaningful words found in dictionaryAPI: \n{self.meaningfulWords}")
+        print(f"\nMeaningful word, but not in api (or down): {self.meaningNotFoundWords}\n")    
 
 if __name__ == '__main__':
     positionalLetters = [None, None, None, None, None]
-    exisitingLetters = 'reu'
+    exisitingLetters = 'acfr'
     wordLength = 5
-    possibleLetters = 'qwtyiosfghjkzxvbm'
-    notPositionalLetters = [['u'], ['u', 'r'], ['r'], ['e'], ['r', 'e']]
+    possibleLetters = 'qyups'
+    notPositionalLetters = [['a', 'f'], ['a'], [], ['a', 'c'], ['r']]
 
     wordleHelper = WordleHelper(positionalLetters, exisitingLetters, wordLength, possibleLetters, notPositionalLetters)
     wordleHelper.buildAllWords()
