@@ -132,11 +132,11 @@ class WordleHelper:
         print(f"\nMeaningful word, but not in api (or down): {self.meaningNotFoundWords}\n")    
 
 if __name__ == '__main__':
-    positionalLetters = [None, None, None, None, None]
-    exisitingLetters = 'acfr'
+    positionalLetters = [None, 'r', None, None, None]
+    exisitingLetters = 'woa'
     wordLength = 5
-    possibleLetters = 'qyups'
-    notPositionalLetters = [['a', 'f'], ['a'], [], ['a', 'c'], ['r']]
+    possibleLetters = 'qypjkzxvbmr'
+    notPositionalLetters = [['w', 'o'], [], ['o', 'a'], ['w'], []]
 
     wordleHelper = WordleHelper(positionalLetters, exisitingLetters, wordLength, possibleLetters, notPositionalLetters)
     wordleHelper.buildAllWords()
