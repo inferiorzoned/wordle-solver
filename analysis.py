@@ -21,8 +21,28 @@ for word in allWordsSorted:
 
 # count frequeuncy table to weighted frequency table
 freq_weights = (freq / freq.sum(axis=1, keepdims=True)) * 100
-print(freq_weights)
-print(freq)
+# print(freq_weights)
+# print(freq)
+# save the freq_weights to a file
+with open("possionalLetterWeights.txt", "w") as f:
+    f.write("5 positions with the probablity of each letter\n")
+    for i in range(5):
+        for j in range(26):
+            f.write(f"{chr(ord('A') + j)} : {freq_weights[i][j]:.1f}")
+            if j != 25:
+                f.write(", ")
+        f.write("\n")
+
+    f.write("\n26 letters with the weighted frequency of being in 5 positions\n")
+    for j in range(26):
+        for i in range(5):
+            f.write(f"{chr(ord('A') + j)} : {freq_weights[i][j]:.1f}")
+            if i != 4:
+                f.write(", ")
+        f.write("\n")
+
+
+
 
 # create barplots
 # for n in range(5):
@@ -52,11 +72,10 @@ word_scores = map(lambda w: (w, calculate_score(w, freq)), allWordsSorted)
 # sort the word scores in descending order
 word_scores = sorted(word_scores, key = lambda x: x[1], reverse=True)
 # print the top 50 words
-for word, score in word_scores[:500]:
+for word, score in word_scores[:100]:
     print(f"{word} - {score}")
 
 # save all word scores to a file
 with open("allWordsScores.txt", "w") as f:
     for word, score in word_scores:
         f.write(f"{word} - {score}\n")
-        
