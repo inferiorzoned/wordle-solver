@@ -94,6 +94,17 @@ def findSecondWord(first_word: str, scored_words: tuple) -> tuple:
         if not first_word_letters.intersection(set(word)):
             return (word, score)
 
+def getLetterSummedWeights(freq: np.array) -> dict:
+    """
+    Return the summed weights of each letter
+    """
+    summed_weights = {}
+    for j in range(numberOfLetters):
+        summed_weights[chr(ord('A') + j)] = 0
+        for i in range(wordLength):
+            summed_weights[chr(ord('A') + j)] += freq[i][j]
+    return summed_weights
+
 allWordsSorted = open("allFiveLetterWords.txt").read().splitlines()
 freq = createFrequencyTable(allWordsSorted)
 # count frequeuncy table to weighted frequency table
@@ -128,7 +139,11 @@ for first_word, first_word_score in zip(first_word_choices, first_word_scores):
 for entry in word_pair_choices:
     print(f"{entry[0]} - {entry[1]} - {entry[2]:.2f} - {entry[3]:.2f} - {entry[4]:.2f}")
 
-
 """
 Possible first two words are CANES and BORTY
+or maybe, TALES and CORNY
 """
+
+letersWeights =  getLetterSummedWeights(freq_weights)
+lettersWeightsSorted = {k:v for k, v in sorted(letersWeights.items(), key=lambda item: item[1], reverse=True)}
+print(lettersWeightsSorted)
