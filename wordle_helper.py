@@ -130,13 +130,19 @@ class WordleHelper:
         print(f"\nNumber of all possible words : {len(self.allPossibleWords)}")
         print(f"\nMeaningful words found in dictionaryAPI: \n{self.meaningfulWords}")
         print(f"\nMeaningful word, but not in api (or down): {self.meaningNotFoundWords}\n")    
+    
+    def getAllWords(self):
+        """
+        return all the possible words
+        """
+        return self.allPossibleWords
 
 if __name__ == '__main__':
     positionalLetters = [None, None, None, None, None]
-    exisitingLetters = 'acfr'
+    exisitingLetters = 'boer'
     wordLength = 5
-    possibleLetters = 'qyups'
-    notPositionalLetters = [['a', 'f'], ['a'], [], ['a', 'c'], ['r']]
+    possibleLetters = 'qwypfjzxcvm'
+    notPositionalLetters = [['b', 'r'], ['o', 'e'], [], ['r', 'e'], []]
 
     wordleHelper = WordleHelper(positionalLetters, exisitingLetters, wordLength, possibleLetters, notPositionalLetters)
     wordleHelper.buildAllWords()

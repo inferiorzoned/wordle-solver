@@ -140,11 +140,8 @@ class DictionaryAPI:
 
 if __name__ == "__main__":
     myDict = DictionaryAPI()
-    word = "oncer"
-    meanings = myDict.find_meaning(word, show_synonyms = True)
+    word = "tacit"
+    meanings = myDict.find_meaning(word, show_synonyms = True, show_antonyms=True)
     for meaning in meanings:
         print(meaning)
     
-
-
-
