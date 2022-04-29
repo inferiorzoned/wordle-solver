@@ -42,21 +42,30 @@ class WordleSolver:
         """
         pass    
 
-    def createVerdict(self, guessWord, answerWord) -> str:
-        """
-        Creates a verdict string by matching the guessed and answer word
-        """
-        # create a dict of all letters of answerWord with the frequency of letters in one line
-        answerWordFreq = {letter: answerWord.count(letter) for letter in answerWord}
+def createVerdict(guessWord, answerWord) -> str:
+    """
+    Creates a verdict string by matching the guessed and answer word
+    """
+    # create a dict of all letters of answerWord with the frequency of letters
+    # used to handle letters appearing more times in guessWord than in answerWord
+    # example case: answerWord = "bored", guessWord = "boron"
+    answerWordFreq = {letter: answerWord.count(letter) for letter in answerWord}
 
-        for i in range(len(answerWord)):
-            if guessWord[i] == answerWord[i]:
-                verdict += '+'
-            elif guessWord[i] in answerWord and answerWordFreq[guessWord[i]]:
-                verdict += '?'
-            else:
-                verdict += '-'
+    verdict = ""
+    for i in range(len(answerWord)):
+        print(answerWordFreq)
+        if guessWord[i] == answerWord[i]:
+            verdict += '+'
+            answerWordFreq[guessWord[i]] -= 1
+        elif guessWord[i] in answerWord and answerWordFreq[guessWord[i]] > 0:
+            verdict += '?'
+            answerWordFreq[guessWord[i]] -= 1
+        else:
+            verdict += '-'
+    return verdict
 
+# test createVerdict
+print(createVerdict("bqroo", "bored"))
     
         
 
