@@ -124,7 +124,7 @@ def getLetterSummedWeights(freq: np.array) -> dict:
     for j in range(numberOfLetters):
         summed_weights[chr(ord('A') + j)] = 0
         for i in range(wordLength):
-            summed_weights[chr(ord('A') + j)] += freq[i][j]
+            summed_weights[chr(ord('A') + j)] += (freq[i][j] / wordLength)
     return summed_weights
 
 allWordsSorted = open("allFiveLetterWords.txt").read().splitlines()
@@ -169,6 +169,7 @@ or maybe, TALES and CORNY
 """
 
 letterWeights =  getLetterSummedWeights(freq_weights)
+print(letterWeights)
 saveLetterTotalWeightsCSV(letterWeights, "letterTotalWeights.csv")
 lettersWeightsSorted = {k:v for k, v in sorted(letterWeights.items(), key=lambda item: item[1], reverse=True)}
 print(lettersWeightsSorted)
