@@ -1,40 +1,49 @@
 import pandas as pd
 
-
 def scoreAWord(word):
     # letterPosFreqScores: 5 rows (positions), 26 columns (letters)
     letterPosFreqScores = pd.read_csv('scoring utils/weighted_freqs_letters_positions.csv')
-    # letterFreqScores: 26 columns (letters)
-    letterTotalScores = pd.read_csv('scoring utils/letter_total_weights.csv')
+    # letterAppearFreqScores: 26 columns (letters)
+    letterAppearFreqScores = pd.read_csv('scoring utils/letter_total_weights.csv')
 
     letterPosFreqScores = letterPosFreqScores.values
-    freqScore = 0
+    posFreqScore = 0
     for idx, letter in enumerate(word):
         # convert the letter to lowercase
         letter = letter.lower()
         # convert the letter to value of 0 - 25
         letter = ord(letter) - ord('a')
         # increment the score
-        freqScore += letterPosFreqScores[idx][letter]
-    print(freqScore)
+        posFreqScore += letterPosFreqScores[idx][letter]
+    print(posFreqScore)
 
-    letterTotalScores = letterTotalScores.values
-    totalScore = 0
+    letterAppearFreqScores = letterAppearFreqScores.values
+    appearFreqScore = 0
     for letter in word:
         # convert the letter to lowercase
         letter = letter.lower()
         # convert the letter to value of 0 - 25
         letter = ord(letter) - ord('a')
         # increment the score
-        totalScore += letterTotalScores[0][letter]
+        appearFreqScore += letterAppearFreqScores[0][letter]
+    print(appearFreqScore)
 
-    print(totalScore)
+    return posFreqScore + appearFreqScore
 
 class WordleScorer:
     def __init__(self, validWords):
         self.validWords = validWords
 
-scoreAWord('abcde')
+    def scoreAllWords(self):
+        self.wordScores = {}
+        for word in self.validWords:
+            self.wordScores[word] = scoreAWord(word)
+        print(self.wordScores)
+        return self.wordScores
+
+scoreAWord('hello')
+
+
 
 
 

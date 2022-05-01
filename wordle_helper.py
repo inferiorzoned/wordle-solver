@@ -147,3 +147,4 @@ if __name__ == '__main__':
     wordleHelper = WordleHelper(positionalLetters, exisitingLetters, wordLength, possibleLetters, notPositionalLetters)
     wordleHelper.buildAllWords()
     wordleHelper.printAllWords()
+    
