@@ -135,6 +135,7 @@ class WordleHelper:
         """
         return all the possible words
         """
+        # self.buildAllWords()
         return self.allPossibleWords
 
 if __name__ == '__main__':

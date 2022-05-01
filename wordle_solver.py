@@ -12,7 +12,6 @@ def createVerdict(guessWord, answerWord) -> str:
 
     verdict = ""
     for i in range(len(answerWord)):
-        print(answerWordFreq)
         if guessWord[i] == answerWord[i]:
             verdict += '+'
             answerWordFreq[guessWord[i]] -= 1
@@ -57,7 +56,10 @@ class WordleSolver:
         :return : a list of possible words 
         """
         helper = WordleHelper(self.positionalLetters, self.existingLetters, self.wordlLength, self.possibleLetters, self.notPositionalLetters)
+        
         allValidWords = helper.getAllWords()
+        print(len(allValidWords))
+        return allValidWords
 
     def solve(self, answerWord):
         """
@@ -87,7 +89,7 @@ class WordleSolver:
 
 
 # test createVerdict
-print(createVerdict("bqroo", "bored"))
+# print(createVerdict("bqroo", "bored"))
 
 
 answerWord = "brain"
