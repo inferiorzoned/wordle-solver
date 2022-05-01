@@ -1,7 +1,8 @@
 # take all words from allFiveLetterWords.txt and create a frequency table of all possitional letters
+import csv
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
-import collections
 
 wordLength = 5
 numberOfLetters = 26
@@ -50,6 +51,27 @@ def saveFreqWeights(freq: np.array, filename: str) -> None:
                     f.write(", ")
             f.write("\n")
 
+def saveLetterFreqWeightsCSV(freq: np.array, filename: str) -> None:
+    """
+    Save the frequency weights to a file
+    (as 26 letters => weighted frequency in 5 positions)
+    """
+    with open(filename, "w") as f:
+        headerList = [chr(i + ord('A')) for i in range(numberOfLetters)]
+        df = pd.DataFrame(freq, columns=headerList)
+        df.to_csv(f, index=False)
+
+def saveLetterTotalWeightsCSV(letterWeight: dict, filename: str) -> None:
+    """
+    Save the summed weights of each letter to a CSV file
+    (as 26 letters => total weights of 5 positions)
+    """
+    with open(filename, "w") as f:
+        headerList = [chr(i + ord('A')) for i in range(numberOfLetters)]
+        # convert letterWeight to a numpy array
+        letterWeightArray = np.array([letterWeight[chr(ord('A') + i)] for i in range(numberOfLetters)]).reshape(1, -1)
+        df = pd.DataFrame(letterWeightArray, columns=headerList)
+        df.to_csv(f, index=False)
 
 def createBarplots(freq: np.array) -> None:
     """
@@ -109,6 +131,8 @@ allWordsSorted = open("allFiveLetterWords.txt").read().splitlines()
 freq = createFrequencyTable(allWordsSorted)
 # count frequeuncy table to weighted frequency table
 freq_weights = (freq / freq.sum(axis=1, keepdims=True)) * 100
+saveLetterFreqWeightsCSV(freq_weights, "weighted_freqs_letters_positions.csv")
+
 # print(freq_weights)
 # print(freq)
 saveFreqWeights(freq_weights, "possionalLetterWeights.txt")
@@ -144,6 +168,7 @@ Possible first two words are CANES and BORTY
 or maybe, TALES and CORNY
 """
 
-letersWeights =  getLetterSummedWeights(freq_weights)
-lettersWeightsSorted = {k:v for k, v in sorted(letersWeights.items(), key=lambda item: item[1], reverse=True)}
+letterWeights =  getLetterSummedWeights(freq_weights)
+saveLetterTotalWeightsCSV(letterWeights, "letterTotalWeights.csv")
+lettersWeightsSorted = {k:v for k, v in sorted(letterWeights.items(), key=lambda item: item[1], reverse=True)}
 print(lettersWeightsSorted)
