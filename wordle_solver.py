@@ -30,25 +30,32 @@ class WordleSolver:
         self.possibleLetters = "qwertyuiopasdfghjklzxcvbnm"
         self.notPositionalLetters = [[]] * self.wordlLength
 
+    def __str__(self):
+        # print posinalletters, existingLetters, possibleLetters, notPositionalLetters
+        return "positionalLetters: {}\nexistingLetters: {}\npossibleLetters: {}\nnotPositionalLetters: {}".format(self.positionalLetters, self.existingLetters, self.possibleLetters, self.notPositionalLetters)
+
     def updateParamas(self, word: str, verdict: str) -> None:
-        """
-        Update the params according to the verdict of given word
-        verdict is given as '-' or '+' or '?'
-        '-' means the letter is absent in the word
+        """ 
+        Update the params according to the verdict of given word 
+        verdict is given as '-' or '+' or '?' 
+        '-' means the letter is absent in the word 
         '+' means the letter is in exact position 
-        '?' means the letter is in the word but not in the exact position
-        : param word: the word to be checked
-        : param verdict: the verdict of the each letter of the word
-        """
-        # letterToVerdict = {(word[i], verdict[i]) for i in range(self.wordLength)}
+        '?' means the letter is in the word but not in the exact position 
+        : param word: the word to be checked 
+        : param verdict: the verdict of the each letter of the word 
+        """ 
+        print(word, verdict)
         for i in range(self.wordlLength):
             if verdict[i] == '-':
-                self.possibleLetters.replace(word[i], "")
+                self.possibleLetters = self.possibleLetters.replace(word[i], "")
             elif verdict[i] == '+':
                 self.positionalLetters[i] = word[i]
             elif verdict[i] == '?':
                 self.existingLetters += word[i]
+                print(self.notPositionalLetters)
+                print(self.notPositionalLetters[i])
                 self.notPositionalLetters[i].append(word[i])
+                print(self.notPositionalLetters)
 
     def getHelpFromHelper(self) -> list:
         """
@@ -69,16 +76,21 @@ class WordleSolver:
         # start with a chosen first word 
         firstWord = "tales"
         firstWordVerdict = createVerdict(firstWord, answerWord)
+        # print(firstWordVerdict)
         self.updateParamas(firstWord, firstWordVerdict)
+        print(self)
         # start with a chosen second word
-        secondWord = "corny"
-        secondWordVerdict = createVerdict(secondWord, answerWord)
-        self.updateParamas(secondWord, secondWordVerdict)
+        # secondWord = "corny"
+        # secondWordVerdict = createVerdict(secondWord, answerWord)
+        # print(secondWordVerdict)
+        # self.updateParamas(secondWord, secondWordVerdict)
+        # print(self)
         # now start exploring using scorer and helper
-        allValidWords = self.getHelpFromHelper()
-        scorer = WordleScorer(allValidWords)
-        wordScores = scorer.scoreAllWords()
-        print(wordScores)
+        
+        # allValidWords = self.getHelpFromHelper()
+        # scorer = WordleScorer(allValidWords)
+        # wordScores = scorer.scoreAllWords()
+        # print(wordScores)
 
 
     def scoreWords(self, allValidWords: list) -> dict:

@@ -139,8 +139,8 @@ class WordleHelper:
         return self.allPossibleWords
 
 if __name__ == '__main__':
-    positionalLetters = [None, None, None, None, None]
-    exisitingLetters = 'boer'
+    positionalLetters = [None, None, None, None, None]    # green letters
+    exisitingLetters = 'boer'   # yellow letters
     wordLength = 5
     possibleLetters = 'qwypfjzxcvm'
     notPositionalLetters = [['b', 'r'], ['o', 'e'], [], ['r', 'e'], []]
