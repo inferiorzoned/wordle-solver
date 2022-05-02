@@ -5,9 +5,9 @@ def scoreAWord(word):
     # letterPosFreqScores: 5 rows (positions), 26 columns (letters)
     # print(os.path.abspath('scoring utils/weighted_freqs_letters_positions.csv'))
     # letterPosFreqScores = pd.read_csv(os.path.abspath('scoring utils/weighted_freqs_letters_positions.csv'))
-    letterPosFreqScores = pd.read_csv('scorer/scoring utils/weighted_freqs_letters_positions.csv')
+    letterPosFreqScores = pd.read_csv('../scorer/scoring utils/weighted_freqs_letters_positions.csv')
     # letterAppearFreqScores: 26 columns (letters)
-    letterAppearFreqScores = pd.read_csv('scorer/scoring utils/letter_total_weights.csv')
+    letterAppearFreqScores = pd.read_csv('../scorer/scoring utils/letter_total_weights.csv')
 
     letterPosFreqScores = letterPosFreqScores.values
     posFreqScore = 0
