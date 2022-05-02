@@ -17,8 +17,7 @@ def scoreAWord(word):
         # convert the letter to value of 0 - 25
         letter = ord(letter) - ord('a')
         # increment the score
-        posFreqScore += letterPosFreqScores[idx][letter]
-    print(posFreqScore)
+        posFreqScore += letterPosFreqScores[idx][letter]    
 
     letterAppearFreqScores = letterAppearFreqScores.values
     appearFreqScore = 0
@@ -29,7 +28,6 @@ def scoreAWord(word):
         letter = ord(letter) - ord('a')
         # increment the score
         appearFreqScore += letterAppearFreqScores[0][letter]
-    print(appearFreqScore)
 
     return posFreqScore + appearFreqScore
 
@@ -39,10 +37,8 @@ class WordleScorer:
 
     def scoreAllWords(self):
         self.wordScores = {}
-        print(len(self.validWords))
         for word in self.validWords:
             self.wordScores[word] = scoreAWord(word)
-        print(self.wordScores)
         return self.wordScores
 
 # scoreAWord('hello')
