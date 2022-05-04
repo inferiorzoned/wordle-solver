@@ -34,6 +34,9 @@ class WordleSolver:
         self.existingLetters = ""
         self.possibleLetters = "qwertyuiopasdfghjklzxcvbnm"
         self.notPositionalLetters = [[] for _ in range(self.wordlLength)]
+        self.dictionaryMode = False
+        self.firstWord = "tales"
+        self.secondWord = "corny"
 
     def __str__(self):
         # print posinalletters, existingLetters, possibleLetters, notPositionalLetters
@@ -65,7 +68,7 @@ class WordleSolver:
         Takes help from the wordle helper
         :return : a list of possible words 
         """
-        helper = WordleHelper(self.positionalLetters, self.existingLetters, self.wordlLength, self.possibleLetters, self.notPositionalLetters)
+        helper = WordleHelper(self.positionalLetters, self.existingLetters, self.wordlLength, self.possibleLetters, self.notPositionalLetters, self.dictionaryMode)
         
         allValidWords = helper.getAllWords()
         print(len(allValidWords))
@@ -78,47 +81,66 @@ class WordleSolver:
             print("The answer is not found, correct answer is {}".format(answerWord))
         print("Number of attempts taken: {}".format(attemptsTaken))
 
+    def analyzeFixedGuess(self, attemptsTaken, guessWord, answerWord) -> bool: 
+        """
+        Analyzes a fixed guess word against the answer word
+        : param guessWord: the guess word
+        : param answerWord: the answer word
+        """
+        foundAnswer = guessWord == answerWord
+        if foundAnswer:
+            self.__giveFinalVerdict(attemptsTaken, foundAnswer, answerWord)
+            return foundAnswer
+        guessWordVerdict = createVerdict(guessWord, answerWord)
+        self.updateParamas(guessWord, guessWordVerdict)
+        return foundAnswer
+        
+
     def solve(self, answerWord):
         """
         : param answerWord: the answer word
         : return: a list of all possible words
         """
-        # start with a chosen first word 
-        firstWord = "tales"
-        firstWordVerdict = createVerdict(firstWord, answerWord)
-        # print(firstWordVerdict)
-        self.updateParamas(firstWord, firstWordVerdict)
-        print(self)
-        # start with a chosen second word
-        secondWord = "corny"
-        secondWordVerdict = createVerdict(secondWord, answerWord)
-        print(secondWordVerdict)
-        self.updateParamas(secondWord, secondWordVerdict)
-        print(self)
+        guessesTaken = set()
+        attemptsTaken = 0
+        # start with a fixed first word 
+        attemptsTaken += 1
+        foundAnswer = self.analyzeFixedGuess(attemptsTaken, self.firstWord, answerWord)
+        guessesTaken.add(self.firstWord)
+        if foundAnswer:
+            return
+        # print(self)
+        # start with a fixed second word
+        attemptsTaken += 1
+        foundAnswer = self.analyzeFixedGuess(attemptsTaken, self.secondWord, answerWord)
+        guessesTaken.add(self.secondWord)
+        if foundAnswer:
+            return
+        # print(self)
         # now start exploring using scorer and helper
-        attemptsTaken = 2
-        foundAnswer = False
-        while attemptsTaken < self.maxNumberOfAttempts and not foundAnswer:
+        while attemptsTaken < self.maxNumberOfAttempts:
+            attemptsTaken += 1
             allValidWords = self.getHelpFromHelper()
             scorer = WordleScorer(allValidWords)
             wordScores = scorer.scoreAllWords()
             print(wordScores)
             # get the best word
             bestWord = max(wordScores, key = lambda k : wordScores[k])
+            # if the best word is already guessed, try second best word
+            while bestWord in guessesTaken:
+                # remove bestWord from wordScores dict
+                del wordScores[bestWord]
+                print(wordScores)
+                bestWord = max(wordScores, key = lambda k : wordScores[k])
+            foundAnswer = bestWord == answerWord
+            guessesTaken.add(bestWord)
+            if foundAnswer:
+                break
             print("Best word is {}".format(bestWord))
             bestWordVerdict = createVerdict(bestWord, answerWord)
             self.updateParamas(bestWord, bestWordVerdict)
-            attemptsTaken += 1
-            foundAnswer = bestWord == answerWord
             print(self)
         self.__giveFinalVerdict(attemptsTaken, foundAnswer, answerWord)
-
-    def scoreWords(self, allValidWords: list) -> dict:
-        """
-        : param allValidWords: 
-        """
-        pass    
-
 
 # test createVerdict
 # print(createVerdict("bqroo", "bored"))
