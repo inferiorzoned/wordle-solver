@@ -139,7 +139,7 @@ def loadWordScoresFromFile(filename: str) -> dict:
 # letterWeights =  getLetterSummedWeights(freq_weights)
 # saveLetterTotalWeightsCSV(letterWeights, "letter_total_weights.csv")
 # lettersWeightsSorted = {k:v for k, v in sorted(letterWeights.items(), key=lambda item: item[1], reverse=True)}
-
+# print(lettersWeightsSorted)
 """
 # create a dict of words from allWordsSorted with scores as values
 """
@@ -147,7 +147,6 @@ def loadWordScoresFromFile(filename: str) -> dict:
 # word_scores = {k: v for k, v in sorted(word_scores.items(), key=lambda item: item[1], reverse=True)}
 word_scores = loadWordScoresFromFile("allWordsScores.txt")
 # saveWordScores(word_scores, "allWordsScores.txt")
-
 
 
 """
@@ -175,18 +174,15 @@ def findSecondWord(first_word: str, scored_words: tuple) -> tuple:
         if len(set(word)) == wordLength and not first_word_letters.intersection(set(word)):
             return (word, score)
 
-first_word_choices = [
-    "cares", "bares", "pares", "tares", "cores", "bores", "mares", "pores",
-    "canes", "dares", "banes", "tores", "gares", "panes", "fares", "lares",
-    "bales", "mores", "cones", "dores", "pales", "bones", "saxes", "hares", "gores", "tales", "manes"
-]
 
 first_word_choices = getPossibleFirstWords(word_scores)
-print(first_word_choices)
+# print(first_word_choices)
 first_word_scores = [word_scores[word] for word in first_word_choices]
 
+"""
+Create firstword-secondword word pairs with max info gain(score)
+"""
 word_pair_choices = []
-# print(first_word_scores)
 for first_word, first_word_score in zip(first_word_choices, first_word_scores):
     second_word, second_word_score = findSecondWord(first_word, word_scores)
     # print(f"The second word is {second_word}")
@@ -196,6 +192,7 @@ for entry in word_pair_choices:
     print(f"{entry[0]} - {entry[1]} - {entry[2]:.2f} - {entry[3]:.2f} - {entry[4]:.2f}")
 
 """
-Possible first two words are CANES and BORTY
+Possible first two words are TARES and DOILY
 or maybe, TALES and CORNY
+or maybe, TORES and DAILY
 """

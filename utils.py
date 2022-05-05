@@ -13,6 +13,6 @@ with open("not_included.txt") as f:
 allWords = included + not_included
 allWords.sort()
 
-with open("allWords.txt", "w") as f:
+with open("allFiveLetterWords.txt", "w") as f:
     for word in allWords:
         f.write(f"{word}\n")
