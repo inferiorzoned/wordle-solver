@@ -28,28 +28,17 @@ def createFrequencyTable(allWords: list) -> np.array:
     return freq
 
 
-def saveFreqWeights(freq: np.array, filename: str) -> None:
-    """
-    Save the frequency weights to a file
-    """
-    with open(filename, "w") as f:
-        f.write("5 positions with the probablity of each letter\n")
-        for i in range(wordLength):
-            for j in range(numberOfLetters):
-                f.write(f"{chr(ord('A') + j)} : {freq_weights[i][j]:.1f}")
-                if j != numberOfLetters - 1:
-                    f.write(", ")
-            f.write("\n")
 
-        f.write(
-            "\n26 letters with the weighted frequency of being in 5 positions\n"
-        )
-        for j in range(numberOfLetters):
-            for i in range(wordLength):
-                f.write(f"{chr(ord('A') + j)} : {freq_weights[i][j]:.1f}")
-                if i != wordLength - 1:
-                    f.write(", ")
-            f.write("\n")
+def getLetterSummedWeights(freq: np.array) -> dict:
+    """
+    Return the summed weights of each letter
+    """
+    summed_weights = {}
+    for j in range(numberOfLetters):
+        summed_weights[chr(ord('A') + j)] = 0
+        for i in range(wordLength):
+            summed_weights[chr(ord('A') + j)] += (freq[i][j] / wordLength)
+    return summed_weights
 
 def saveLetterFreqWeightsCSV(freq: np.array, filename: str) -> None:
     """
@@ -86,19 +75,35 @@ def createBarplots(freq: np.array) -> None:
         plt.show()
 
 
-def calculateScore(word: str, freq: np.array) -> float:
+def calculateScore(word: str) -> float:
     """
-    Calculate the score of a word using the frequency table
+    Calculate the score of a word
     """
-    score = 0
+    letterPosFreqScores = pd.read_csv('weighted_freqs_letters_positions.csv')
+    # letterAppearFreqScores: 26 columns (letters)
+    letterAppearFreqScores = pd.read_csv('letter_total_weights.csv')
+
+    letterPosFreqScores = letterPosFreqScores.values
+    posFreqScore = 0
     for idx, letter in enumerate(word):
         # convert the letter to lowercase
         letter = letter.lower()
-        # convert the letter to value of 0 - 2wordLength
+        # convert the letter to value of 0 - 25
         letter = ord(letter) - ord('a')
         # increment the score
-        score += freq[idx][letter]
-    return score
+        posFreqScore += letterPosFreqScores[idx][letter]    
+
+    letterAppearFreqScores = letterAppearFreqScores.values
+    appearFreqScore = 0
+    for letter in word:
+        # convert the letter to lowercase
+        letter = letter.lower()
+        # convert the letter to value of 0 - 25
+        letter = ord(letter) - ord('a')
+        # increment the score
+        appearFreqScore += letterAppearFreqScores[0][letter]
+
+    return posFreqScore + appearFreqScore
 
 
 def saveWordScores(word_scores: dict, filename: str) -> None:
@@ -107,50 +112,77 @@ def saveWordScores(word_scores: dict, filename: str) -> None:
         for word, score in word_scores.items():
             f.write(f"{word} - {score}\n")
 
+def loadWordScoresFromFile(filename: str) -> dict:
+    """
+    Load the word scores from a file
+    """
+    word_scores = {}
+    with open(filename, "r") as f:
+        for line in f:
+            word, score = line.split(" - ")
+            word_scores[word] = float(score)
+    return word_scores
+
+# allWordsSorted = open("allFiveLetterWords.txt").read().splitlines()
+# freq = createFrequencyTable(allWordsSorted)
+"""
+# count frequeuncy table to weighted frequency table 
+# (probablity of appearance at a particular position in a word)
+"""
+# freq_weights = (freq / freq.sum(axis=1, keepdims=True)) * 100
+# saveLetterFreqWeightsCSV(freq_weights, "weighted_freqs_letters_positions.csv")
+
+"""
+# calculate the summed weights of each letter 
+# (probability of appearance in a word)
+"""
+# letterWeights =  getLetterSummedWeights(freq_weights)
+# saveLetterTotalWeightsCSV(letterWeights, "letter_total_weights.csv")
+# lettersWeightsSorted = {k:v for k, v in sorted(letterWeights.items(), key=lambda item: item[1], reverse=True)}
+
+"""
+# create a dict of words from allWordsSorted with scores as values
+"""
+# word_scores = dict(map(lambda w: (w, calculateScore(w)), allWordsSorted))
+# word_scores = {k: v for k, v in sorted(word_scores.items(), key=lambda item: item[1], reverse=True)}
+word_scores = loadWordScoresFromFile("allWordsScores.txt")
+# saveWordScores(word_scores, "allWordsScores.txt")
+
+
+
+"""
+Starting first two words analysis
+"""
+
+def getPossibleFirstWords(word_scores: dict) -> list:
+    """
+    Return a list of all possible first words
+    """
+    possibleFirstWords = []
+    for word, score in word_scores.items():
+        # making sure no duplicate letter in the word, and score is significant
+        if len(set(word)) == wordLength and score > 110.0:
+            possibleFirstWords.append(word)
+    return possibleFirstWords
+
 def findSecondWord(first_word: str, scored_words: tuple) -> tuple:
     """
     Return the (word, score) with the highest score containing no letter of the first_word
     """
     first_word_letters = set(first_word)
     for word, score in scored_words.items():
-        if not first_word_letters.intersection(set(word)):
+        # making sure no duplicate letter in the word, and no duplicate letter between the first and second word
+        if len(set(word)) == wordLength and not first_word_letters.intersection(set(word)):
             return (word, score)
 
-def getLetterSummedWeights(freq: np.array) -> dict:
-    """
-    Return the summed weights of each letter
-    """
-    summed_weights = {}
-    for j in range(numberOfLetters):
-        summed_weights[chr(ord('A') + j)] = 0
-        for i in range(wordLength):
-            summed_weights[chr(ord('A') + j)] += (freq[i][j] / wordLength)
-    return summed_weights
-
-allWordsSorted = open("allFiveLetterWords.txt").read().splitlines()
-freq = createFrequencyTable(allWordsSorted)
-# count frequeuncy table to weighted frequency table
-freq_weights = (freq / freq.sum(axis=1, keepdims=True)) * 100
-saveLetterFreqWeightsCSV(freq_weights, "weighted_freqs_letters_positions.csv")
-
-# print(freq_weights)
-# print(freq)
-saveFreqWeights(freq_weights, "possionalLetterWeights.txt")
-# create a dict of words from allWordsSorted with scores as values
-word_scores = dict(map(lambda w: (w, calculateScore(w, freq_weights)), allWordsSorted))
-word_scores = {k: v for k, v in sorted(word_scores.items(), key=lambda item: item[1], reverse=True)}
-
-saveWordScores(word_scores, "allWordsScores.txt")
-
-
-"""
-Starting first two words analysis
-"""
 first_word_choices = [
     "cares", "bares", "pares", "tares", "cores", "bores", "mares", "pores",
     "canes", "dares", "banes", "tores", "gares", "panes", "fares", "lares",
     "bales", "mores", "cones", "dores", "pales", "bones", "saxes", "hares", "gores", "tales", "manes"
 ]
+
+first_word_choices = getPossibleFirstWords(word_scores)
+print(first_word_choices)
 first_word_scores = [word_scores[word] for word in first_word_choices]
 
 word_pair_choices = []
@@ -167,9 +199,3 @@ for entry in word_pair_choices:
 Possible first two words are CANES and BORTY
 or maybe, TALES and CORNY
 """
-
-letterWeights =  getLetterSummedWeights(freq_weights)
-print(letterWeights)
-saveLetterTotalWeightsCSV(letterWeights, "letterTotalWeights.csv")
-lettersWeightsSorted = {k:v for k, v in sorted(letterWeights.items(), key=lambda item: item[1], reverse=True)}
-print(lettersWeightsSorted)
