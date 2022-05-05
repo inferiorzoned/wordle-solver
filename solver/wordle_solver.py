@@ -9,6 +9,9 @@ from config import Config
 def createVerdict(guessWord, answerWord) -> str:
     """
     Creates a verdict string by matching the guessed and answer word
+    : param guessWord: the guessed word
+    : param answerWord: the answer word
+    : return: a verdict string
     """
     # create a dict of all letters of answerWord and guessWord with the frequency of letters
     # used to handle letters appearing more times in guessWord than in answerWord
@@ -47,7 +50,9 @@ class WordleSolver:
         self.infoGainAtThirdAttempt = False
 
     def __str__(self):
-        # print posinalletters, existingLetters, possibleLetters, notPositionalLetters
+        """
+        : return posinalletters, existingLetters, possibleLetters, notPositionalLetters
+        """
         return "positionalLetters: {}\nexistingLetters: {}\npossibleLetters: {}\nnotPositionalLetters: {}".format(self.positionalLetters, self.existingLetters, self.possibleLetters, self.notPositionalLetters)
 
     def updateParamas(self, word: str, verdict: str) -> None:
@@ -73,7 +78,7 @@ class WordleSolver:
                 self.notPositionalLetters[i].append(word[i])
                 
 
-    def getHelpFromHelper(self) -> list:
+    def __getHelpFromHelper(self) -> list:
         """
         Takes help from the wordle helper
         :return : a list of possible words 
@@ -93,7 +98,7 @@ class WordleSolver:
         scorer = WordleScorer(wordlist)
         return scorer.scoreAllWords()
     
-    def getBestwordWithoutDuplicates(self, wordScores: dict, previousBestWord: str) -> str:
+    def __getBestwordWithoutDuplicates(self, wordScores: dict, previousBestWord: str) -> str:
         """
         Gets the best word from the wordlist without duplicates
         : param wordScores: the scores of the words in the wordlist
@@ -108,12 +113,11 @@ class WordleSolver:
             bestWord = max(wordScores, key = lambda k : wordScores[k])
         return bestWord
 
-    def getBestWord(self) -> str:
+    def __getBestWord(self) -> str:
         """
         Returns the best word from the given word scores
-        : param wordScores: a dictionary of words and their scores
         """
-        allValidWords = self.getHelpFromHelper()
+        allValidWords = self.__getHelpFromHelper()
         if len(allValidWords) == 0:
             return None
         wordScores = self.scoreTheWords(allValidWords)
@@ -133,14 +137,19 @@ class WordleSolver:
             temp = self.positionalLetters
             self.positionalLetters = [None] * self.wordlLength
             self.infoGainAtThirdAttempt = True
-            bestWord = self.getBestWord() or bestWord
+            bestWord = self.__getBestWord() or bestWord
             self.positionalLetters = temp
         # if attempts taken is less than 4, try not to include duplicates
         if self.attemptsTaken <= 4:
-            bestWord = self.getBestwordWithoutDuplicates(wordScores, bestWord)
+            bestWord = self.__getBestwordWithoutDuplicates(wordScores, bestWord)
         return bestWord
 
     def __giveFinalVerdict(self, foundAnswer, answerWord):
+        """
+        Give the final verdict of the game
+        : param foundAnswer: the word found
+        : param answerWord: the answer word
+        """
         if foundAnswer:
             print("The answer is {}".format(answerWord))
         else:
@@ -164,7 +173,6 @@ class WordleSolver:
     def testSolver(self, answerWord):
         """
         : param answerWord: the answer word
-        : return: a list of all possible words
         """
         self.guessesTaken = set()
         self.attemptsTaken = 0
@@ -185,7 +193,7 @@ class WordleSolver:
         # now start exploring using scorer and helper
         while self.attemptsTaken < self.maxNumberOfAttempts:
             self.attemptsTaken += 1
-            bestWord = self.getBestWord()
+            bestWord = self.__getBestWord()
             foundAnswer = bestWord == answerWord
             self.guessesTaken.add(bestWord)
             if foundAnswer:
@@ -208,7 +216,7 @@ class WordleSolver:
         elif self.attemptsTaken == 2:
             self.guessesTaken.add(self.secondWord)
             return self.secondWord
-        bestWord = self.getBestWord()
+        bestWord = self.__getBestWord()
         self.guessesTaken.add(bestWord)
         return bestWord
 
@@ -216,21 +224,21 @@ class WordleSolver:
 # test createVerdict
 # print(createVerdict("rrrrr", "rooro"))
 
-# answerWord = "inbox"
+answerWord = "lover"
 solver = WordleSolver()
-# solver.testSolver(answerWord)
+solver.testSolver(answerWord)
 
-while(True):
-    myGuess = solver.getNextGuess()
-    print(f"Best word is {myGuess.upper()} with {solver.attemptsTaken} attempts")
+# while(True):
+#     myGuess = solver.getNextGuess()
+#     print(f"Best word is {myGuess.upper()} with {solver.attemptsTaken} attempts")
 
-    print("give the verdict for the guess")
-    verdict = input()
-    if verdict == "+++++":
-        break
-    solver.updateParamas(myGuess, verdict)
+#     print("give the verdict for the guess")
+#     verdict = input()
+#     if verdict == "+++++":
+#         break
+#     solver.updateParamas(myGuess, verdict)
 
-print("Number of attempts taken: {}".format(solver.attemptsTaken))
+# print("Number of attempts taken: {}".format(solver.attemptsTaken))
 
 
 

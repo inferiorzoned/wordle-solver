@@ -46,7 +46,7 @@ class WordleHelper:
         self.meaningNotFoundWords = []
         self.listedWords = []
         self.positionalLetters = positionalLetters
-        self.myWordAsDict = self.__buildDictFromWord(positionalLetters)
+        self.myWordAsDict = self.buildDictFromWord(positionalLetters)
         self.existingLetters = exisitingLetters
         self.wordLength = wordLength
         self.possibleLetters = possibleLetters
@@ -54,15 +54,18 @@ class WordleHelper:
         self.notPositionalLetters = notPositionalLetters
         self.dictionaryMode = dictionaryMode
 
-    def __buildDictFromWord(self, letters: Union[list, str]) -> dict:
+    def buildDictFromWord(self, letters: Union[list, str]) -> dict:
         """
         Returns a dictionary of index to letters
+        : return: the dictionary
         """
         return {i: letters[i] for i in range(len(letters))}
 
-    def __buildWordFromDict(self, wordAsDict: dict) -> str:
+    def buildWordFromDict(self, wordAsDict: dict) -> str:
         """
         Build a word from myWord dict
+        :param wordAsDict: the dictionary of index to letters
+        :return: the word
         """
         word = ""
         for i in wordAsDict:
@@ -75,6 +78,7 @@ class WordleHelper:
     def __addWordToLists(self, word: str):
         """
         add the word to the both the lists(allPossibleWords, meaningfulWords, meaningNotFOundWords)
+        : param word: the word to add
         """
         self.allPossibleWords.append(word)
         if existsInWordList(word):
@@ -84,14 +88,16 @@ class WordleHelper:
     def __backtrackAllWords(self, idx: int, wordAsDict: Union[dict , str]):
         """
         backtrack to generate all the words from probableLetters
+        :param idx: the index to check
+        :param wordAsDict: the dictionary of index to letters
         """
         self.backtrackCount += 1
         if idx == 0:
-            word = self.__buildWordFromDict(wordAsDict)
+            word = self.buildWordFromDict(wordAsDict)
             if word:
                 # check if word contains all the letters in self.existingLetters
                 if all(letter in word for letter in self.existingLetters):
-                    self.__addWordToLists(word)
+                    self.addWordToLists(word)
             return
         for letter in self.probableLetters:
             # check if the letter is not in that position
@@ -119,6 +125,37 @@ class WordleHelper:
                 if verbose:
                     print(f"{word} is not a meaningful word")
 
+    def __addWordsFromWordlist(self):
+        """
+        add words listedwords from the word list based on the criterias
+        """
+        for word in allWordsSorted:
+            # check if word contains only the letters from self.probableLetters
+            if not all(letter in self.probableLetters for letter in word):
+                continue
+            # check if word contains the positional letters at the correct position
+            containsPositionalLetters = True
+            for i in range(self.wordLength):
+                if self.positionalLetters[i] :
+                    if word[i] != self.positionalLetters[i]:
+                        containsPositionalLetters = False
+                        break
+            if not containsPositionalLetters:
+                continue
+            # check if word does not contain any of the notPositionalLetters at correct position
+            containsNotPositionalLetters = False
+            for i in range(self.wordLength):
+                if self.notPositionalLetters[i] :
+                    if word[i] in self.notPositionalLetters[i]:
+                        containsNotPositionalLetters = True
+                        break
+            if containsNotPositionalLetters:
+                continue
+            # check if word contains all the letters in self.existingLetters
+            if all(letter in word for letter in self.existingLetters):
+                self.listedWords.append(word)
+            
+
     def buildAllWords(self):
         """
         build all the words by calling backtrackAllWords
@@ -126,7 +163,8 @@ class WordleHelper:
         self.lettersInCorrectPos = "".join(letter for letter in self.positionalLetters if letter)
         # add already correct letters into consideration to handle duplicates
         self.probableLetters = self.possibleLetters + self.lettersInCorrectPos
-        self.__backtrackAllWords(self.wordLength, self.myWordAsDict)
+        # self.__backtrackAllWords(self.wordLength, self.myWordAsDict)
+        self.__addWordsFromWordlist()
     
     def printAllWords(self):
         """
@@ -143,6 +181,7 @@ class WordleHelper:
     def getAllWords(self):
         """
         return all the possible words
+        :return: wordlist
         """
         self.buildAllWords()
         return self.listedWords
