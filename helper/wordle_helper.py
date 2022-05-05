@@ -97,7 +97,7 @@ class WordleHelper:
             if word:
                 # check if word contains all the letters in self.existingLetters
                 if all(letter in word for letter in self.existingLetters):
-                    self.addWordToLists(word)
+                    self.__addWordToLists(word)
             return
         for letter in self.probableLetters:
             # check if the letter is not in that position
@@ -162,7 +162,7 @@ class WordleHelper:
         """
         self.lettersInCorrectPos = "".join(letter for letter in self.positionalLetters if letter)
         # add already correct letters into consideration to handle duplicates
-        self.probableLetters = self.possibleLetters + self.lettersInCorrectPos
+        self.probableLetters = self.possibleLetters + self.existingLetters + self.lettersInCorrectPos 
         # self.__backtrackAllWords(self.wordLength, self.myWordAsDict)
         self.__addWordsFromWordlist()
     
@@ -187,16 +187,16 @@ class WordleHelper:
         return self.listedWords
 
 if __name__ == '__main__':
-    positionalLetters = [None, None, None, None, None]    # green letters
-    existingLetters = 'boer'   # yellow letters
-    wordLength = 5
-    possibleLetters = 'qwypfjzxcvm' + existingLetters    # all letters - (grey letters + green letters)
-    notPositionalLetters = [['b', 'r'], ['o', 'e'], [], ['r', 'e'], []]
-    # positionalLetters = ['s', None, None, None, None]    # green letters
-    # existingLetters = 'l'   # yellow letters
+    # positionalLetters = [None, None, None, None, None]    # green letters
+    # existingLetters = 'boer'   # yellow letters
     # wordLength = 5
-    # possibleLetters = 'qweyuazxn'
-    # notPositionalLetters = [[], [], [], [], []]
+    # possibleLetters = 'qwypfjzxcvm' + existingLetters    # all letters - (grey letters + green letters)
+    # notPositionalLetters = [['b', 'r'], ['o', 'e'], [], ['r', 'e'], []]
+    positionalLetters = [None, 'i', None, None, 'y']    # green letters
+    existingLetters = 'id'   # yellow letters
+    wordLength = 5
+    possibleLetters = 'qwpfgjkzxv'   # all letters - (grey letters + green letters + yellow letters)
+    notPositionalLetters = [['t', 'c', 'h', 'b'], ['a', 'o', 'u'], ['l', 'r', 'm', 'd'], ['e', 'n', 'i', 'd'], ['s', 'd']]
     dictionaryMode = False
 
     wordleHelper = WordleHelper(positionalLetters, existingLetters, wordLength, possibleLetters, notPositionalLetters, dictionaryMode)
