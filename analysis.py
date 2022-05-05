@@ -188,6 +188,8 @@ for first_word, first_word_score in zip(first_word_choices, first_word_scores):
     # print(f"The second word is {second_word}")
     word_pair_choices.append((first_word, second_word, first_word_score, second_word_score, first_word_score + second_word_score))
 
+# sort the word pairs by 4th element (first_word_score + second_word_score)
+word_pair_choices = sorted(word_pair_choices, key=lambda item: item[4], reverse=True)
 for entry in word_pair_choices:
     print(f"{entry[0]} - {entry[1]} - {entry[2]:.2f} - {entry[3]:.2f} - {entry[4]:.2f}")
 
