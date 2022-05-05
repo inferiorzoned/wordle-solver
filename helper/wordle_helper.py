@@ -2,12 +2,12 @@ from tabnanny import verbose
 from dictionary_api import DictionaryAPI
 from typing import Union
 
+allWordsSorted = open("../helper/allFiveLetterWords.txt").read().splitlines()
 def existsInWordList(word):
     """
     Check whether the word exists in sorted allFiveLetterWords list
     """
     word = word.lower()
-    allWordsSorted = open("../helper/allFiveLetterWords.txt").read().splitlines()
     lo = 0
     hi = len(allWordsSorted) - 1
     while lo <= hi:
@@ -78,7 +78,7 @@ class WordleHelper:
         """
         self.allPossibleWords.append(word)
         if existsInWordList(word):
-            print(word)
+            # print(word)
             self.listedWords.append(word)
 
     def __backtrackAllWords(self, idx: int, wordAsDict: Union[dict , str]):
@@ -89,7 +89,7 @@ class WordleHelper:
         if idx == 0:
             word = self.__buildWordFromDict(wordAsDict)
             if word:
-                # check if word contains all of the letter in self.existingLetters
+                # check if word contains all the letters in self.existingLetters
                 if all(letter in word for letter in self.existingLetters):
                     self.__addWordToLists(word)
             return
