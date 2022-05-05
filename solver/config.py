@@ -3,4 +3,5 @@ class Config:
     wordLength = 5
     firstWord = "tales"
     secondWord = "corny"
+    debugMode = 0
     
