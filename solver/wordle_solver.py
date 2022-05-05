@@ -232,7 +232,7 @@ class WordleSolver:
 # test createVerdict
 # print(createVerdict("rrrrr", "rooro"))
 
-answerWord = "witch"
+answerWord = "water"
 solver = WordleSolver()
 solver.testSolver(answerWord)
 
