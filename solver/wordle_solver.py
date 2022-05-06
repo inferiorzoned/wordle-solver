@@ -232,10 +232,16 @@ class WordleSolver:
 # test createVerdict
 # print(createVerdict("rrrrr", "rooro"))
 
-answerWord = "witch"
-solver = WordleSolver()
-solver.testSolver(answerWord)
+"""
+testing the solver
+"""
+# answerWord = "witch"
+# solver = WordleSolver()
+# solver.testSolver(answerWord)
 
+"""
+running the solver
+"""
 # while(True):
 #     myGuess = solver.getNextGuess()
 #     print(f"Best word is {myGuess.upper()} with {solver.attemptsTaken} attempts")
