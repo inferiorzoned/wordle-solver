@@ -1,5 +1,4 @@
 # take all words from allFiveLetterWords.txt and create a frequency table of all possitional letters
-import csv
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -174,6 +173,15 @@ def findSecondWord(first_word: str, scored_words: tuple) -> tuple:
         if len(set(word)) == wordLength and not first_word_letters.intersection(set(word)):
             return (word, score)
 
+def saveTopPairsTOCSV(top_pairs: list, filename: str) -> None:
+    """
+    Save the top pairs to a CSV file
+    """
+    with open(filename, "w") as f:
+        headerList = ["First Word", "Second Word", "First Word Score", "Second Word Score", "Combined Score"]
+        df = pd.DataFrame(top_pairs, columns=headerList)
+        df.to_csv(f, index=False)
+
 
 first_word_choices = getPossibleFirstWords(word_scores)
 # print(first_word_choices)
@@ -193,8 +201,12 @@ word_pair_choices = sorted(word_pair_choices, key=lambda item: item[4], reverse=
 for entry in word_pair_choices:
     print(f"{entry[0]} - {entry[1]} - {entry[2]:.2f} - {entry[3]:.2f} - {entry[4]:.2f}")
 
+
+# save top 50 pairs to a CSV file
+saveTopPairsTOCSV(word_pair_choices[:50], "top_word_pairs.csv")
+
 """
-Possible first two words are TARES and DOILY
-or maybe, TALES and CORNY
-or maybe, TORES and DAILY
+Possible first two words are TALES and CORNY
+or maybe, TONES and PARLY
+or maybe, CONES and PARTY
 """
