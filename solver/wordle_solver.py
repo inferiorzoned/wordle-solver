@@ -74,6 +74,7 @@ class WordleSolver:
                 self.notPositionalLetters[i].append(word[i])
             elif verdict[i] == '+':
                 self.positionalLetters[i] = word[i]
+                self.existingLetters = self.existingLetters.replace(word[i], "")
                 self.possibleLetters = self.possibleLetters.replace(word[i], "")
             elif verdict[i] == '?':
                 if word[i] not in self.existingLetters:
@@ -127,6 +128,8 @@ class WordleSolver:
         if Config.debugMode > 0:
             print(wordScores)
         bestWord = max(wordScores, key = lambda k : wordScores[k])
+        if Config.debugMode > 0:
+            print(f"Best word is {bestWord.upper()} with {self.attemptsTaken} attempts")
         # if the best word is already guessed, try next best word
         while bestWord in self.guessesTaken:
             # remove bestWord from wordScores dict
@@ -134,6 +137,8 @@ class WordleSolver:
             if Config.debugMode > 0:
                 print(wordScores)
             bestWord = max(wordScores, key = lambda k : wordScores[k])
+            if Config.debugMode > 0:
+                print(f"Best word is {bestWord.upper()} with {self.attemptsTaken} attempts")
         """
         some info gaining tweaks
         """
@@ -144,10 +149,12 @@ class WordleSolver:
             temp = self.positionalLetters
             self.positionalLetters = [None] * self.wordlLength
             self.infoGainAtThirdAttempt = True
+            if Config.debugMode > 0:
+                print(self)
             bestWord = self.__getBestWord() or bestWord
             self.positionalLetters = temp
-        # if attempts taken is less than 4, try not to include duplicates
-        if self.attemptsTaken <= 4:
+        # if attempts taken is less than 3, try not to include duplicates
+        if self.attemptsTaken <= 3:
             bestWord = self.__getBestwordWithoutDuplicates(wordScores, bestWord)
         return bestWord
 
@@ -185,6 +192,8 @@ class WordleSolver:
         self.attemptsTaken = 0
         # start with a fixed first word 
         self.attemptsTaken += 1
+        if Config.debugMode > 0:
+            print(f"Attempt no {self.attemptsTaken}")
         foundAnswer = self.analyzeFixedGuess(self.firstWord, answerWord)
         self.guessesTaken.add(self.firstWord)
         if foundAnswer:
@@ -193,6 +202,8 @@ class WordleSolver:
             print(self)
         # start with a fixed second word
         self.attemptsTaken += 1
+        if Config.debugMode > 0:
+            print(f"Attempt no {self.attemptsTaken}")
         foundAnswer = self.analyzeFixedGuess(self.secondWord, answerWord)
         self.guessesTaken.add(self.secondWord)
         if foundAnswer:
@@ -202,6 +213,8 @@ class WordleSolver:
         # now start exploring using scorer and helper
         while self.attemptsTaken < self.maxNumberOfAttempts:
             self.attemptsTaken += 1
+            if Config.debugMode > 0:
+                print(f"Attempt no {self.attemptsTaken}")
             bestWord = self.__getBestWord()
             foundAnswer = bestWord == answerWord
             self.guessesTaken.add(bestWord)
@@ -234,12 +247,12 @@ class WordleSolver:
 # test createVerdict
 # print(createVerdict("rrrrr", "rooro"))
 
+solver = WordleSolver()
 """
 testing the solver
 """
-# answerWord = "witch"
-# solver = WordleSolver()
-# solver.testSolver(answerWord)
+answerWord = "horse"
+solver.testSolver(answerWord)
 
 """
 running the solver
@@ -255,8 +268,6 @@ running the solver
 #     solver.updateParamas(myGuess, verdict)
 
 # print("Number of attempts taken: {}".format(solver.attemptsTaken))
-
-
 
 
 
