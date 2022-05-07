@@ -8,16 +8,20 @@ def singleWordPairAnalysis(saveToFile = False):
     wordAttemptDict = {}
     attemptCount = 0
     attemptSum = 0
+    guessedWithinAllowedAttempts = 0
     for word in allWordleWords:
         solver = WordleSolver()
         solver.testSolver(word)
         wordAttemptDict[word] = solver.attemptsTaken
         attemptSum += solver.attemptsTaken
         attemptCount += 1
+        if solver.attemptsTaken <= Config.allowedNumberOfAttempts:
+            guessedWithinAllowedAttempts += 1
     print(wordAttemptDict)
     print(f"Total number of attempts are {attemptSum}")
     print(f"Number of wordle words are {attemptCount}")
     print(f"Average attempt is {attemptSum/attemptCount}")
+    print(f"Number of words guessed within {Config.allowedNumberOfAttempts} attempts is {guessedWithinAllowedAttempts}")
 
 def loadWordPairs(filename: str) -> list:
     """

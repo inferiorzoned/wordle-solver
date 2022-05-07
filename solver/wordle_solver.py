@@ -137,9 +137,10 @@ class WordleSolver:
         """
         some info gaining tweaks
         """
-        # In 3rd attempt, if there are more than 15 words in wordScores, try to discard all green letters (if any exists)
+        # In 3rd attempt, if there are more than 10 words in wordScores, 
+        # try to discard all green letters (if any exists)
         # and search for the best word again (to gain more info)
-        if self.attemptsTaken <= 3 and len(wordScores) >= 15 and any(self.positionalLetters) and not self.infoGainAtThirdAttempt:
+        if self.attemptsTaken <= 3 and len(wordScores) >= 10 and any(self.positionalLetters) and not self.infoGainAtThirdAttempt:
             temp = self.positionalLetters
             self.positionalLetters = [None] * self.wordlLength
             self.infoGainAtThirdAttempt = True
