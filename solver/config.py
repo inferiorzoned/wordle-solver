@@ -1,7 +1,8 @@
 class Config:
-    maxNumberOfAttempts = 10
+    maxNumberOfAttempts = 30
+    allowedNumberOfAttempts = 6
     wordLength = 5
-    firstWord = "tales"
-    secondWord = "corny"
+    firstWord = "tones"
+    secondWord = "parly"
     debugMode = 0
     

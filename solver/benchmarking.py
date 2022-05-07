@@ -42,7 +42,7 @@ def allWordPairAnalysis():
 
 
 # analyze with the word pair from the config file
-# singleWordPairAnalysis()
+singleWordPairAnalysis()
 
 # analyze with all word pairs
-allWordPairAnalysis()
+# allWordPairAnalysis()

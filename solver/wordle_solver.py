@@ -137,8 +137,9 @@ class WordleSolver:
         """
         some info gaining tweaks
         """
-        # In 3rd attempt, if there are more than 25 words in wordScores, try to discard all green letters (if any exists)
-        if self.attemptsTaken <= 3 and len(wordScores) >= 25 and any(self.positionalLetters) and not self.infoGainAtThirdAttempt:
+        # In 3rd attempt, if there are more than 15 words in wordScores, try to discard all green letters (if any exists)
+        # and search for the best word again (to gain more info)
+        if self.attemptsTaken <= 3 and len(wordScores) >= 15 and any(self.positionalLetters) and not self.infoGainAtThirdAttempt:
             temp = self.positionalLetters
             self.positionalLetters = [None] * self.wordlLength
             self.infoGainAtThirdAttempt = True
@@ -155,11 +156,11 @@ class WordleSolver:
         : param foundAnswer: the word found
         : param answerWord: the answer word
         """
-        if foundAnswer:
-            print("The answer is {}".format(answerWord))
+        if foundAnswer and self.attemptsTaken <= Config.allowedNumberOfAttempts:
+            print(f"The correct answer is {answerWord}, number of attempts taken: {self.attemptsTaken}")
         else:
             print("The answer is not found, correct answer is {}".format(answerWord))
-        print("Number of attempts taken: {}".format(self.attemptsTaken))
+            print(f"Number of attempts taken: {self.attemptsTaken}")
 
     def analyzeFixedGuess(self, guessWord, answerWord) -> bool: 
         """
