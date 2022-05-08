@@ -1,3 +1,4 @@
+from distutils.log import info
 from re import S
 import sys
 
@@ -110,11 +111,27 @@ class WordleSolver:
         : return: the best word without duplicates
         """
         bestWord = previousBestWord
-        while (len(set(bestWord)) < Config.wordLength ):
+        while (len(set(bestWord)) < Config.wordLength):
             del wordScores[bestWord]
             if len(wordScores) == 0:
                 return previousBestWord
             bestWord = max(wordScores, key = lambda k : wordScores[k])
+        return bestWord
+
+    def getBestIfAlreadyGuessed(self, previousBestWord: str, wordScores: dict) -> str:
+        """
+        if the best word is already guessed, return the next best word
+        : param previousBestWord: the best word found so far
+        : param wordScores: the scores of the words in the wordlist
+        : return: the best word
+        """
+        bestWord = previousBestWord
+        while bestWord in self.guessesTaken:
+            del wordScores[bestWord]
+            bestWord = max(wordScores, key = lambda k : wordScores[k])
+            if Config.debugMode > 0:
+                print(wordScores)
+                print(f"Best word: {bestWord.upper()} in attempt no {self.attemptsTaken}")
         return bestWord
 
     def __getInfoGainedBestword(self, previousBestWord: str = None, wordScores: dict = None) -> str:
@@ -125,33 +142,37 @@ class WordleSolver:
         : return: the best word with info gained
         """
         bestWord = previousBestWord
-        # if the best word is already guessed, try next best word
-        while bestWord in self.guessesTaken:
-            del wordScores[bestWord]
-            bestWord = max(wordScores, key = lambda k : wordScores[k])
-            if Config.debugMode > 0:
-                print(wordScores)
-                print(f"Best word: {bestWord.upper()} in attempt no {self.attemptsTaken}")
         # in 2nd attempt, try to discard all green letters (if any)
         if self.attemptsTaken == 2 and not self.infoGainAtSecondAttempt:
             temp = self.positionalLetters
             self.positionalLetters = [None] * Config.wordLength
-            self.infoGainAtSecondAttempt = True
             if Config.debugMode > 0:
                 print(self)
+            self.infoGainAtSecondAttempt = True
             bestWord = self.__getBestWord()
             self.positionalLetters = temp
+            return bestWord
         # In 3rd attempt, if there are more than 10 words in wordScores, 
         # try to discard all green letters (if any exists)
         # and search for the best word again (to gain more info)
         if self.attemptsTaken == 3 and len(wordScores) >= 10 and any(self.positionalLetters) and not self.infoGainAtThirdAttempt:
             temp = self.positionalLetters
             self.positionalLetters = [None] * Config.wordLength 
-            self.infoGainAtThirdAttempt = True
             if Config.debugMode > 0:
                 print(self)
-            bestWord = self.__getBestWord() or bestWord
+            self.infoGainAtThirdAttempt = True
+            # bestWord = self.__getBestWord() or bestWord
+            allValidWords = self.__getHelpFromHelper()
+            if len(allValidWords) > 0:
+                wordScores = self.scoreTheWords(allValidWords)
+                bestWord = max(wordScores, key = lambda k : wordScores[k])
+                if Config.debugMode > 0:
+                    print(wordScores)
+                    print(f"Best word is {bestWord.upper()} in attempt no {self.attemptsTaken}")
+                bestWord = self.getBestIfAlreadyGuessed(bestWord, wordScores)
+                bestWord = self.__getBestwordWithoutDuplicates(bestWord, wordScores)
             self.positionalLetters = temp
+            return bestWord
         # if attempts taken is less than 4, try not to include duplicates
         if self.attemptsTaken <= 4:
             bestWord = self.__getBestwordWithoutDuplicates(bestWord, wordScores)
@@ -162,6 +183,8 @@ class WordleSolver:
         """
         Returns the best word from the given word scores
         """
+        if self.attemptsTaken == 2 and not self.infoGainAtSecondAttempt:
+            return self.__getInfoGainedBestword()
         allValidWords = self.__getHelpFromHelper()
         if len(allValidWords) == 0:
             return None
@@ -170,6 +193,8 @@ class WordleSolver:
         if Config.debugMode > 0:
             print(wordScores)
             print(f"Best word is {bestWord.upper()} in attempt no {self.attemptsTaken}")
+        # if the best word is already guessed, get the next best word
+        bestWord = self.getBestIfAlreadyGuessed(bestWord, wordScores)
         # get the best word with additional info gained
         bestWord = self.__getInfoGainedBestword(bestWord, wordScores)
         return bestWord
@@ -226,7 +251,6 @@ class WordleSolver:
         #     return
         # if Config.debugMode > 0:
         #     print(self)
-        # now start exploring using scorer and helper
         while self.attemptsTaken < Config.maxNumberOfAttempts:
             self.attemptsTaken += 1
             if Config.debugMode > 0:
@@ -236,7 +260,7 @@ class WordleSolver:
             self.guessesTaken.add(bestWord)
             if foundAnswer:
                 break
-            print(f"Best word is {bestWord.upper()} with {self.attemptsTaken} attempts")
+            print(f"Best word: {bestWord.upper()} in attempt no {self.attemptsTaken}")
             bestWordVerdict = createVerdict(bestWord, answerWord)
             self.updateParams(bestWord, bestWordVerdict)
             if Config.debugMode > 0:
@@ -274,13 +298,13 @@ def runSolver(solver):
 
 
 # test createVerdict
-# print(createVerdict("rrrrr", "rooro"))
+# print(createVerdict("tones", "robot"))
 
 solver = WordleSolver()
 """
 testing the solver# runSolver(solver)
 """
-answerWord = "curly"
+answerWord = "filer"
 solver.testSolver(answerWord)
 
 """
