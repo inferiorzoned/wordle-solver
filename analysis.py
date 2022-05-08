@@ -122,6 +122,16 @@ def loadWordScoresFromFile(filename: str) -> dict:
             word_scores[word] = float(score)
     return word_scores
 
+
+def saveWordScoresCSV(word_scores: dict, filename: str) -> None:
+    # save all word scores to a csv file
+    with open(filename, "w") as f:
+        headerList = ["Word", "Score"]
+        # convert word_scores to a 2d numpy array (word, score)
+        word_scores_array = np.array([[word, score] for word, score in word_scores.items()])
+        df = pd.DataFrame(word_scores_array, columns=headerList)
+        df.to_csv(f, index=False)
+
 # allWordsSorted = open("allFiveLetterWords.txt").read().splitlines()
 # freq = createFrequencyTable(allWordsSorted)
 """
@@ -146,6 +156,7 @@ def loadWordScoresFromFile(filename: str) -> dict:
 # word_scores = {k: v for k, v in sorted(word_scores.items(), key=lambda item: item[1], reverse=True)}
 word_scores = loadWordScoresFromFile("allWordsScores.txt")
 # saveWordScores(word_scores, "allWordsScores.txt")
+# saveWordScoresCSV(word_scores, "allWordsScores.csv")
 
 
 """
