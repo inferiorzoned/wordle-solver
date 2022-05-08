@@ -4,5 +4,5 @@ class Config:
     wordLength = 5
     firstWord = "tones"
     secondWord = "parly"
-    debugMode = 0
+    debugMode = 1
     

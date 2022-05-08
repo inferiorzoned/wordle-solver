@@ -1,3 +1,4 @@
+from re import S
 import sys
 
 sys.path.append('../helper')
@@ -38,17 +39,15 @@ def createVerdict(guessWord, answerWord) -> str:
 
 class WordleSolver:
     def __init__(self) -> None:
-        self.maxNumberOfAttempts = Config.maxNumberOfAttempts
-        self.wordlLength = Config.wordLength
-        self.positionalLetters = [None] * self.wordlLength
+        self.positionalLetters = [None] * Config.wordLength 
         self.existingLetters = ""
         self.possibleLetters = "qwertyuiopasdfghjklzxcvbnm"
-        self.notPositionalLetters = [[] for _ in range(self.wordlLength)]
+        self.notPositionalLetters = [[] for _ in range(Config.wordLength )]
         self.dictionaryMode = False
-        self.firstWord = Config.firstWord
-        self.secondWord = Config.secondWord
         self.attemptsTaken = 0
+        self.infoGainAtSecondAttempt = False
         self.infoGainAtThirdAttempt = False
+
 
     def __str__(self):
         """
@@ -56,7 +55,7 @@ class WordleSolver:
         """
         return "positionalLetters: {}\nexistingLetters: {}\npossibleLetters: {}\nnotPositionalLetters: {}".format(self.positionalLetters, self.existingLetters, self.possibleLetters, self.notPositionalLetters)
 
-    def updateParamas(self, word: str, verdict: str) -> None:
+    def updateParams(self, word: str, verdict: str) -> None:
         """ 
         Update the params according to the verdict of given word 
         verdict is given as '-' or '+' or '?' 
@@ -68,7 +67,7 @@ class WordleSolver:
         """ 
         if Config.debugMode > 0:
             print(word, verdict)  
-        for i in range(self.wordlLength):
+        for i in range(Config.wordLength ):
             if verdict[i] == '-':
                 self.possibleLetters = self.possibleLetters.replace(word[i], "")
                 self.notPositionalLetters[i].append(word[i])
@@ -80,6 +79,7 @@ class WordleSolver:
                 if word[i] not in self.existingLetters:
                     self.existingLetters += word[i]
                 self.notPositionalLetters[i].append(word[i])
+                self.possibleLetters = self.possibleLetters.replace(word[i], "")
                 
 
     def __getHelpFromHelper(self) -> list:
@@ -87,7 +87,7 @@ class WordleSolver:
         Takes help from the wordle helper
         :return : a list of possible words 
         """
-        helper = WordleHelper(self.positionalLetters, self.existingLetters, self.wordlLength, self.possibleLetters, self.notPositionalLetters, self.dictionaryMode)
+        helper = WordleHelper(self.positionalLetters, self.existingLetters, Config.wordLength , self.possibleLetters, self.notPositionalLetters, self.dictionaryMode)
         
         allValidWords = helper.getAllWords()
         print(f"Number of words found: {len(allValidWords)}")
@@ -102,7 +102,7 @@ class WordleSolver:
         scorer = WordleScorer(wordlist)
         return scorer.scoreAllWords()
     
-    def __getBestwordWithoutDuplicates(self, wordScores: dict, previousBestWord: str) -> str:
+    def __getBestwordWithoutDuplicates(self, previousBestWord: str, wordScores: dict = None) -> str:
         """
         Gets the best word from the wordlist without duplicates
         : param wordScores: the scores of the words in the wordlist
@@ -110,11 +110,52 @@ class WordleSolver:
         : return: the best word without duplicates
         """
         bestWord = previousBestWord
-        while (len(set(bestWord)) < self.wordlLength):
+        while (len(set(bestWord)) < Config.wordLength ):
             del wordScores[bestWord]
             if len(wordScores) == 0:
                 return previousBestWord
             bestWord = max(wordScores, key = lambda k : wordScores[k])
+        return bestWord
+
+    def __getInfoGainedBestword(self, previousBestWord: str = None, wordScores: dict = None) -> str:
+        """
+        Gets the best word by gaining info in different attempts
+        : param wordScores: the scores of the words in the wordlist
+        : param previousBestWord: the best word found so far
+        : return: the best word with info gained
+        """
+        bestWord = previousBestWord
+        # if the best word is already guessed, try next best word
+        while bestWord in self.guessesTaken:
+            del wordScores[bestWord]
+            bestWord = max(wordScores, key = lambda k : wordScores[k])
+            if Config.debugMode > 0:
+                print(wordScores)
+                print(f"Best word: {bestWord.upper()} in attempt no {self.attemptsTaken}")
+        # in 2nd attempt, try to discard all green letters (if any)
+        if self.attemptsTaken == 2 and not self.infoGainAtSecondAttempt:
+            temp = self.positionalLetters
+            self.positionalLetters = [None] * Config.wordLength
+            self.infoGainAtSecondAttempt = True
+            if Config.debugMode > 0:
+                print(self)
+            bestWord = self.__getBestWord()
+            self.positionalLetters = temp
+        # In 3rd attempt, if there are more than 10 words in wordScores, 
+        # try to discard all green letters (if any exists)
+        # and search for the best word again (to gain more info)
+        if self.attemptsTaken == 3 and len(wordScores) >= 10 and any(self.positionalLetters) and not self.infoGainAtThirdAttempt:
+            temp = self.positionalLetters
+            self.positionalLetters = [None] * Config.wordLength 
+            self.infoGainAtThirdAttempt = True
+            if Config.debugMode > 0:
+                print(self)
+            bestWord = self.__getBestWord() or bestWord
+            self.positionalLetters = temp
+        # if attempts taken is less than 4, try not to include duplicates
+        if self.attemptsTaken <= 4:
+            bestWord = self.__getBestwordWithoutDuplicates(bestWord, wordScores)
+            print(f"Best word: {bestWord.upper()} in attempt no {self.attemptsTaken}")
         return bestWord
 
     def __getBestWord(self) -> str:
@@ -125,37 +166,12 @@ class WordleSolver:
         if len(allValidWords) == 0:
             return None
         wordScores = self.scoreTheWords(allValidWords)
-        if Config.debugMode > 0:
-            print(wordScores)
         bestWord = max(wordScores, key = lambda k : wordScores[k])
         if Config.debugMode > 0:
-            print(f"Best word is {bestWord.upper()} with {self.attemptsTaken} attempts")
-        # if the best word is already guessed, try next best word
-        while bestWord in self.guessesTaken:
-            # remove bestWord from wordScores dict
-            del wordScores[bestWord]
-            if Config.debugMode > 0:
-                print(wordScores)
-            bestWord = max(wordScores, key = lambda k : wordScores[k])
-            if Config.debugMode > 0:
-                print(f"Best word is {bestWord.upper()} with {self.attemptsTaken} attempts")
-        """
-        some info gaining tweaks
-        """
-        # In 3rd attempt, if there are more than 10 words in wordScores, 
-        # try to discard all green letters (if any exists)
-        # and search for the best word again (to gain more info)
-        if self.attemptsTaken <= 3 and len(wordScores) >= 10 and any(self.positionalLetters) and not self.infoGainAtThirdAttempt:
-            temp = self.positionalLetters
-            self.positionalLetters = [None] * self.wordlLength
-            self.infoGainAtThirdAttempt = True
-            if Config.debugMode > 0:
-                print(self)
-            bestWord = self.__getBestWord() or bestWord
-            self.positionalLetters = temp
-        # if attempts taken is less than 3, try not to include duplicates
-        if self.attemptsTaken <= 3:
-            bestWord = self.__getBestwordWithoutDuplicates(wordScores, bestWord)
+            print(wordScores)
+            print(f"Best word is {bestWord.upper()} in attempt no {self.attemptsTaken}")
+        # get the best word with additional info gained
+        bestWord = self.__getInfoGainedBestword(bestWord, wordScores)
         return bestWord
 
     def __giveFinalVerdict(self, foundAnswer, answerWord):
@@ -181,7 +197,7 @@ class WordleSolver:
             self.__giveFinalVerdict(foundAnswer, answerWord)
             return foundAnswer
         guessWordVerdict = createVerdict(guessWord, answerWord)
-        self.updateParamas(guessWord, guessWordVerdict)
+        self.updateParams(guessWord, guessWordVerdict)
         return foundAnswer
 
     def testSolver(self, answerWord):
@@ -194,24 +210,24 @@ class WordleSolver:
         self.attemptsTaken += 1
         if Config.debugMode > 0:
             print(f"Attempt no {self.attemptsTaken}")
-        foundAnswer = self.analyzeFixedGuess(self.firstWord, answerWord)
-        self.guessesTaken.add(self.firstWord)
+        foundAnswer = self.analyzeFixedGuess(Config.firstWord, answerWord)
+        self.guessesTaken.add(Config.firstWord)
         if foundAnswer:
             return
         if Config.debugMode > 0:
             print(self)
         # start with a fixed second word
-        self.attemptsTaken += 1
-        if Config.debugMode > 0:
-            print(f"Attempt no {self.attemptsTaken}")
-        foundAnswer = self.analyzeFixedGuess(self.secondWord, answerWord)
-        self.guessesTaken.add(self.secondWord)
-        if foundAnswer:
-            return
-        if Config.debugMode > 0:
-            print(self)
+        # self.attemptsTaken += 1
+        # if Config.debugMode > 0:
+        #     print(f"Attempt no {self.attemptsTaken}")
+        # foundAnswer = self.analyzeFixedGuess(Config.secondWord, answerWord)
+        # self.guessesTaken.add(Config.secondWord)
+        # if foundAnswer:
+        #     return
+        # if Config.debugMode > 0:
+        #     print(self)
         # now start exploring using scorer and helper
-        while self.attemptsTaken < self.maxNumberOfAttempts:
+        while self.attemptsTaken < Config.maxNumberOfAttempts:
             self.attemptsTaken += 1
             if Config.debugMode > 0:
                 print(f"Attempt no {self.attemptsTaken}")
@@ -222,7 +238,7 @@ class WordleSolver:
                 break
             print(f"Best word is {bestWord.upper()} with {self.attemptsTaken} attempts")
             bestWordVerdict = createVerdict(bestWord, answerWord)
-            self.updateParamas(bestWord, bestWordVerdict)
+            self.updateParams(bestWord, bestWordVerdict)
             if Config.debugMode > 0:
                 print(self)
         self.__giveFinalVerdict(foundAnswer, answerWord)
@@ -234,14 +250,27 @@ class WordleSolver:
         self.attemptsTaken += 1
         self.guessesTaken = set()
         if self.attemptsTaken == 1:
-            self.guessesTaken.add(self.firstWord)
-            return self.firstWord
+            self.guessesTaken.add(Config.firstWord)
+            return Config.firstWord
         elif self.attemptsTaken == 2:
-            self.guessesTaken.add(self.secondWord)
-            return self.secondWord
+            self.guessesTaken.add(Config.secondWord)
+            return Config.secondWord
         bestWord = self.__getBestWord()
         self.guessesTaken.add(bestWord)
         return bestWord
+
+def runSolver(solver):
+    while(True):
+        myGuess = solver.getNextGuess()
+        print(f"Best word is {myGuess.upper()} in attempt no {solver.attemptsTaken}")
+
+        print("give the verdict for the guess")
+        verdict = input()
+        if verdict == "+++++":
+            break
+        solver.updateParams(myGuess, verdict)
+
+    print("Number of attempts taken: {}".format(solver.attemptsTaken))
 
 
 # test createVerdict
@@ -249,26 +278,15 @@ class WordleSolver:
 
 solver = WordleSolver()
 """
-testing the solver
+testing the solver# runSolver(solver)
 """
-answerWord = "horse"
+answerWord = "curly"
 solver.testSolver(answerWord)
 
 """
 running the solver
 """
-# while(True):
-#     myGuess = solver.getNextGuess()
-#     print(f"Best word is {myGuess.upper()} with {solver.attemptsTaken} attempts")
-
-#     print("give the verdict for the guess")
-#     verdict = input()
-#     if verdict == "+++++":
-#         break
-#     solver.updateParamas(myGuess, verdict)
-
-# print("Number of attempts taken: {}".format(solver.attemptsTaken))
-
+# runSolver(solver)
 
 
 
