@@ -1,15 +1,12 @@
 import pandas as pd
 import os
 
+# letterPosFreqScores: 5 rows (positions), 26 columns (letters)
+letterPosFreqScoresCSV = pd.read_csv('../scorer/scoring utils/weighted_freqs_letters_positions.csv')
+# letterAppearFreqScores: 26 columns (letters)
+letterAppearFreqScoresCSV = pd.read_csv('../scorer/scoring utils/letter_total_weights.csv')
 def scoreAWord(word):
-    # letterPosFreqScores: 5 rows (positions), 26 columns (letters)
-    # print(os.path.abspath('scoring utils/weighted_freqs_letters_positions.csv'))
-    # letterPosFreqScores = pd.read_csv(os.path.abspath('scoring utils/weighted_freqs_letters_positions.csv'))
-    letterPosFreqScores = pd.read_csv('../scorer/scoring utils/weighted_freqs_letters_positions.csv')
-    # letterAppearFreqScores: 26 columns (letters)
-    letterAppearFreqScores = pd.read_csv('../scorer/scoring utils/letter_total_weights.csv')
-
-    letterPosFreqScores = letterPosFreqScores.values
+    letterPosFreqScores = letterPosFreqScoresCSV.values
     posFreqScore = 0
     for idx, letter in enumerate(word):
         # convert the letter to lowercase
@@ -19,7 +16,7 @@ def scoreAWord(word):
         # increment the score
         posFreqScore += letterPosFreqScores[idx][letter]    
 
-    letterAppearFreqScores = letterAppearFreqScores.values
+    letterAppearFreqScores = letterAppearFreqScoresCSV.values
     appearFreqScore = 0
     for letter in word:
         # convert the letter to lowercase
