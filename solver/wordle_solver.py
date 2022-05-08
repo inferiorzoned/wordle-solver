@@ -5,7 +5,7 @@ import sys
 sys.path.append('../helper')
 sys.path.append('../scorer')
 from wordle_helper import WordleHelper
-from wordle_scorer import WordleScorer
+from wordle_scorer import WordleScorer, precalculateScores
 from config import Config
 
 def createVerdict(guessWord, answerWord) -> str:
@@ -48,6 +48,7 @@ class WordleSolver:
         self.attemptsTaken = 0
         self.infoGainAtSecondAttempt = False
         self.infoGainAtThirdAttempt = False
+        precalculateScores()
 
 
     def __str__(self):
