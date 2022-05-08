@@ -211,8 +211,11 @@ class WordleSolver:
             self.positionalLetters = tempPositional
             self.existingLetters = tempExisting
             return bestWord
+        # if attempts taken is less than 4, try not to include duplicates
+        if self.attemptsTaken <= 4:
+            bestWord = self.__getBestwordWithoutDuplicates(bestWord, wordScores)
         # in 5th attempt, if the verdicts of 3rd and 4th attempts are the same with possiblity of pitfall
-        # for example, 3rd: -+++-, 4th: -++++ or 3rd: -++++, 4th: -++++ or 3rd: -+++-, 4th: -+++-
+        # for example, 3rd: -+++-, 4th: -++++ or 3rd: -++++, 4th: -++++ or 3rd: -+++?, 4th: -+++-
         # word example: (train, brain, grain, drain) or (sords, words, cords, lords, sorda)
         # so, if number of '+' appears more than 2 in both 3rd and 4th attempt verdicts and are in the exact same position
         # then, discard all green letters and search for the best word again (to gain more info)
@@ -243,6 +246,7 @@ class WordleSolver:
                         print(wordScores)
                         print(f"Best word is {bestWord.upper()} in attempt no {self.attemptsTaken}")
                     bestWord = self.getBestIfAlreadyGuessed(bestWord, wordScores)
+                    bestWord = self.__getBestwordWithoutDuplicates(bestWord, wordScores)
                 self.positionalLetters = temp
         return bestWord
 
@@ -374,12 +378,12 @@ solver = WordleSolver()
 testing the solver# runSolver(solver)
 """
 answerWord = "safer"
-# solver.testSolver(answerWord)
+solver.testSolver(answerWord)
 
 """
 running the solver
 """
-runSolver(solver)
+# runSolver(solver)
 
 
 
