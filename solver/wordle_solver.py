@@ -120,6 +120,9 @@ class WordleSolver:
             if len(wordScores) == 0:
                 return previousBestWord
             bestWord = max(wordScores, key = lambda k : wordScores[k])
+            # take lowest scoring in third attempt (to gain low score letter info)
+            # if self.attemptsTaken == 3:
+            #     bestWord = min(wordScores, key = lambda k : wordScores[k])
         return bestWord
 
     def getBestIfAlreadyGuessed(self, previousBestWord: str, wordScores: dict) -> str:
@@ -133,6 +136,9 @@ class WordleSolver:
         while bestWord in self.guessesTaken:
             del wordScores[bestWord]
             bestWord = max(wordScores, key = lambda k : wordScores[k])
+            # take lowest scoring in third attempt (to gain low score letter info)
+            # if self.attemptsTaken == 3:
+            #     bestWord = min(wordScores, key = lambda k : wordScores[k])
             if Config.debugMode > 0:
                 print(wordScores)
                 print(f"Best word: {bestWord.upper()} in attempt no {self.attemptsTaken}")
@@ -156,10 +162,11 @@ class WordleSolver:
             bestWord = self.__getBestWord()
             self.positionalLetters = temp
             return bestWord
-        # In 3rd attempt, if there are more than 10 words in wordScores, 
+        # In 3rd attempt, if there are more than 4 words in wordScores, 
         # try to discard all green letters (if any exists)
         # and search for the best word again (to gain more info)
-        if self.attemptsTaken == 3 and len(wordScores) >= 15 and any(self.positionalLetters) and not self.infoGainAtThirdAttempt:
+        # if equal or less than 5, deterministic in 6 attempts
+        if self.attemptsTaken == 3 and len(wordScores) > 4 and any(self.positionalLetters) and not self.infoGainAtThirdAttempt:
             temp = self.positionalLetters
             self.positionalLetters = [None] * Config.wordLength 
             if Config.debugMode > 0:
@@ -169,6 +176,7 @@ class WordleSolver:
             allValidWords = self.__getHelpFromHelper()
             if len(allValidWords) > 0:
                 wordScores = self.scoreTheWords(allValidWords)
+                # take lowest scoring in third attempt (to gain low score letter info)
                 bestWord = max(wordScores, key = lambda k : wordScores[k])
                 if Config.debugMode > 0:
                     print(wordScores)
@@ -177,16 +185,39 @@ class WordleSolver:
                 bestWord = self.__getBestwordWithoutDuplicates(bestWord, wordScores)
             self.positionalLetters = temp
             return bestWord
-        # if attempts taken is less than 4, try not to include duplicates
-        if self.attemptsTaken <= 4:
-            bestWord = self.__getBestwordWithoutDuplicates(bestWord, wordScores)
+        # In 4th attempt, if there are more than 3 words in wordScores,
+        # if identified at most one green letter and at most three yellow,
+        # try to discard them to gain info
+        # if equal or less than 4, deterministic in 6 attempts
+        lettersIdentified = sum(1 for x in self.positionalLetters if x is not None)
+        if self.attemptsTaken == 4 and len(wordScores) > 3 and lettersIdentified <= 1 and len(self.existingLetters) <= 3:
+            tempPositional = self.positionalLetters
+            tempExisting = self.existingLetters
+            self.positionalLetters = [None] * Config.wordLength 
+            self.existingLetters = ""
+            if Config.debugMode > 0:
+                print(self)
+            # bestWord = self.__getBestWord() or bestWord
+            allValidWords = self.__getHelpFromHelper()
+            if len(allValidWords) > 0:
+                wordScores = self.scoreTheWords(allValidWords)
+                # take lowest scoring in third attempt (to gain low score letter info)
+                bestWord = max(wordScores, key = lambda k : wordScores[k])
+                if Config.debugMode > 0:
+                    print(wordScores)
+                    print(f"Best word is {bestWord.upper()} in attempt no {self.attemptsTaken}")
+                bestWord = self.getBestIfAlreadyGuessed(bestWord, wordScores)
+                bestWord = self.__getBestwordWithoutDuplicates(bestWord, wordScores)
+            self.positionalLetters = tempPositional
+            self.existingLetters = tempExisting
+            return bestWord
         # in 5th attempt, if the verdicts of 3rd and 4th attempts are the same with possiblity of pitfall
-        # for example, 3rd: -+++-, 4th: -++++ or 3rd: -++++, 4th: -++++ or 3rd: -+++?, 4th: -+++-
+        # for example, 3rd: -+++-, 4th: -++++ or 3rd: -++++, 4th: -++++ or 3rd: -+++-, 4th: -+++-
         # word example: (train, brain, grain, drain) or (sords, words, cords, lords, sorda)
         # so, if number of '+' appears more than 2 in both 3rd and 4th attempt verdicts and are in the exact same position
         # then, discard all green letters and search for the best word again (to gain more info)
-        # but if length of wordScores is less than 3, then no need as deterministic in 6 attempts
-        if self.attemptsTaken == Config.allowedNumberOfAttempts - 1 and len(wordScores) > Config.allowedNumberOfAttempts - (self.attemptsTaken - 1):
+        # but if len of wordScores is less than 3, deterministic in 6 attempts
+        if self.attemptsTaken == 5 and len(wordScores) > 2:
             # i.e. if self.attemptsTaken == 5 or len(wordScores) > 2:
             # check the 3rd and 4th attempts verdicts
             thirdVerdict = self.verdicts[2]
@@ -198,8 +229,7 @@ class WordleSolver:
                     return bestWord
                 if symbol3 == symbol4 and symbol3 == '+':
                     matched += 1
-            if matched > 2:
-                # print(wordScores)
+            if matched > 3:
                 # discard all green letters
                 temp = self.positionalLetters
                 self.positionalLetters = [None] * Config.wordLength
@@ -208,12 +238,11 @@ class WordleSolver:
                 allValidWords = self.__getHelpFromHelper()
                 if len(allValidWords) > 0:
                     wordScores = self.scoreTheWords(allValidWords)
-                    bestWord = max(wordScores, key = lambda k : wordScores[k])
+                    bestWord = min(wordScores, key = lambda k : wordScores[k])
                     if Config.debugMode > 0:
                         print(wordScores)
                         print(f"Best word is {bestWord.upper()} in attempt no {self.attemptsTaken}")
                     bestWord = self.getBestIfAlreadyGuessed(bestWord, wordScores)
-                    bestWord = self.__getBestwordWithoutDuplicates(bestWord, wordScores)
                 self.positionalLetters = temp
         return bestWord
 
@@ -344,13 +373,13 @@ solver = WordleSolver()
 """
 testing the solver# runSolver(solver)
 """
-answerWord = "water"
-solver.testSolver(answerWord)
+answerWord = "safer"
+# solver.testSolver(answerWord)
 
 """
 running the solver
 """
-# runSolver(solver)
+runSolver(solver)
 
 
 
