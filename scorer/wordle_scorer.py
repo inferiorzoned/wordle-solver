@@ -12,6 +12,39 @@ def precalculateScores():
     # convert allWordsScores to a dictionary in one line
     allWordsScoresDict = dict(zip(allWordsScoresCSV['Word'], allWordsScoresCSV['Score']))
 
+def getMostScoredLetter(letters):
+    highestScore = 0
+    highestLetter = None
+    letterAppearFreqScores = letterAppearFreqScoresCSV.values
+    for letter in letters:
+        # convert the letter to lowercase
+        letter = letter.lower()
+        # convert the letter to value of 0 - 25
+        letter = ord(letter) - ord('a')
+        if letterAppearFreqScores[0][letter] > highestScore:
+            highestScore = letterAppearFreqScores[0][letter]
+            highestLetter = letter
+    return chr(highestLetter + ord('a')) if highestLetter is not None else ""
+
+def getMostScoredVowel(letters):
+    highestScore = 0
+    highestLetter = None
+    letterAppearFreqScores = letterAppearFreqScoresCSV.values
+    for letter in letters:
+        # check if the letter is a vowel
+        if letter.lower() in ['a', 'e', 'i', 'o', 'u']:
+            # convert the letter to value of 0 - 25
+            letter = ord(letter) - ord('a')
+            if letterAppearFreqScores[0][letter] > highestScore:
+                highestScore = letterAppearFreqScores[0][letter]
+                highestLetter = letter
+    if highestLetter is not None:
+        return chr(highestLetter + ord('a'))
+    else:
+        return ""
+
+# print(getMostScoredLetter('abcdefghijklmnopqrstuvwxyz'))
+
 def scoreAWord(word):
     # using static dictionary of precalculated scores
     return allWordsScoresDict[word]
