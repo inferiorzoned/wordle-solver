@@ -102,8 +102,20 @@ def calculateScore(word: str) -> float:
         # increment the score
         appearFreqScore += letterAppearFreqScores[0][letter]
 
-    return posFreqScore + appearFreqScore
+    relativePosFreqScore = 0
+    for idx, letter in enumerate(word):
+        # convert the letter to lowercase
+        letter = letter.lower()
+        # convert the letter to value of 0 - 25
+        letter = ord(letter) - ord('a')
+        # letterPosFreqScores[idx][letter] divided by sum(letterPosFreqScores[:, letter])
+        relativePosFreqScore += (letterPosFreqScores[idx][letter] / letterPosFreqScores[:, letter].sum()) * 100
+        # print(chr(letter + ord('a')), letterPosFreqScores[idx][letter], letterPosFreqScores[:, letter].sum(), relativePosFreqScore)
 
+    # print(word, relativePosFreqScore)
+    return posFreqScore + appearFreqScore + relativePosFreqScore / 2
+
+print(calculateScore("candy"))
 
 def saveWordScores(word_scores: dict, filename: str) -> None:
     # save all word scores to a file
@@ -132,22 +144,22 @@ def saveWordScoresCSV(word_scores: dict, filename: str) -> None:
         df = pd.DataFrame(word_scores_array, columns=headerList)
         df.to_csv(f, index=False)
 
-# allWordsSorted = open("allFiveLetterWords.txt").read().splitlines()
-# freq = createFrequencyTable(allWordsSorted)
+allWordsSorted = open("allFiveLetterWords.txt").read().splitlines()
+freq = createFrequencyTable(allWordsSorted)
 """
 # count frequeuncy table to weighted frequency table 
 # (probablity of appearance at a particular position in a word)
 """
-# freq_weights = (freq / freq.sum(axis=1, keepdims=True)) * 100
+freq_weights = (freq / freq.sum(axis=1, keepdims=True)) * 100
 # saveLetterFreqWeightsCSV(freq_weights, "weighted_freqs_letters_positions.csv")
 
 """
 # calculate the summed weights of each letter 
 # (probability of appearance in a word)
 """
-# letterWeights =  getLetterSummedWeights(freq_weights)
+letterWeights =  getLetterSummedWeights(freq_weights)
 # saveLetterTotalWeightsCSV(letterWeights, "letter_total_weights.csv")
-# lettersWeightsSorted = {k:v for k, v in sorted(letterWeights.items(), key=lambda item: item[1], reverse=True)}
+lettersWeightsSorted = {k:v for k, v in sorted(letterWeights.items(), key=lambda item: item[1], reverse=True)}
 # print(lettersWeightsSorted)
 """
 # create a dict of words from allWordsSorted with scores as values
@@ -201,20 +213,20 @@ first_word_scores = [word_scores[word] for word in first_word_choices]
 """
 Create firstword-secondword word pairs with max info gain(score)
 """
-word_pair_choices = []
-for first_word, first_word_score in zip(first_word_choices, first_word_scores):
-    second_word, second_word_score = findSecondWord(first_word, word_scores)
-    # print(f"The second word is {second_word}")
-    word_pair_choices.append((first_word, second_word, first_word_score, second_word_score, first_word_score + second_word_score))
+# word_pair_choices = []
+# for first_word, first_word_score in zip(first_word_choices, first_word_scores):
+#     second_word, second_word_score = findSecondWord(first_word, word_scores)
+#     # print(f"The second word is {second_word}")
+#     word_pair_choices.append((first_word, second_word, first_word_score, second_word_score, first_word_score + second_word_score))
 
-# sort the word pairs by 4th element (first_word_score + second_word_score)
-word_pair_choices = sorted(word_pair_choices, key=lambda item: item[4], reverse=True)
-for entry in word_pair_choices:
-    print(f"{entry[0]} - {entry[1]} - {entry[2]:.2f} - {entry[3]:.2f} - {entry[4]:.2f}")
+# # sort the word pairs by 4th element (first_word_score + second_word_score)
+# word_pair_choices = sorted(word_pair_choices, key=lambda item: item[4], reverse=True)
+# for entry in word_pair_choices:
+#     print(f"{entry[0]} - {entry[1]} - {entry[2]:.2f} - {entry[3]:.2f} - {entry[4]:.2f}")
 
 
 # save top 50 pairs to a CSV file
-saveTopPairsTOCSV(word_pair_choices[:50], "top_word_pairs.csv")
+# saveTopPairsTOCSV(word_pair_choices[:50], "top_word_pairs.csv")
 
 """
 Possible first two words are TALES and CORNY
