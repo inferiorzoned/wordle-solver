@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 wordLength = 5
 numberOfLetters = 26
@@ -109,13 +110,13 @@ def calculateScore(word: str) -> float:
         # convert the letter to value of 0 - 25
         letter = ord(letter) - ord('a')
         # letterPosFreqScores[idx][letter] divided by sum(letterPosFreqScores[:, letter])
-        relativePosFreqScore += (letterPosFreqScores[idx][letter] / letterPosFreqScores[:, letter].sum()) * 100
+        relativePosFreqScore += (letterPosFreqScores[idx][letter] / letterPosFreqScores[:, letter].sum()) * 20
         # print(chr(letter + ord('a')), letterPosFreqScores[idx][letter], letterPosFreqScores[:, letter].sum(), relativePosFreqScore)
 
     # print(word, relativePosFreqScore)
-    return posFreqScore + appearFreqScore + relativePosFreqScore / 2
+    return posFreqScore + appearFreqScore + relativePosFreqScore 
 
-print(calculateScore("candy"))
+print(calculateScore("gitch"))
 
 def saveWordScores(word_scores: dict, filename: str) -> None:
     # save all word scores to a file
@@ -144,31 +145,31 @@ def saveWordScoresCSV(word_scores: dict, filename: str) -> None:
         df = pd.DataFrame(word_scores_array, columns=headerList)
         df.to_csv(f, index=False)
 
-allWordsSorted = open("allFiveLetterWords.txt").read().splitlines()
-freq = createFrequencyTable(allWordsSorted)
+# allWordsSorted = open("allFiveLetterWords.txt").read().splitlines()
+# freq = createFrequencyTable(allWordsSorted)
 """
 # count frequeuncy table to weighted frequency table 
 # (probablity of appearance at a particular position in a word)
 """
-freq_weights = (freq / freq.sum(axis=1, keepdims=True)) * 100
+# freq_weights = (freq / freq.sum(axis=1, keepdims=True)) * 100
 # saveLetterFreqWeightsCSV(freq_weights, "weighted_freqs_letters_positions.csv")
 
 """
 # calculate the summed weights of each letter 
 # (probability of appearance in a word)
 """
-letterWeights =  getLetterSummedWeights(freq_weights)
+# letterWeights =  getLetterSummedWeights(freq_weights)
 # saveLetterTotalWeightsCSV(letterWeights, "letter_total_weights.csv")
-lettersWeightsSorted = {k:v for k, v in sorted(letterWeights.items(), key=lambda item: item[1], reverse=True)}
+# lettersWeightsSorted = {k:v for k, v in sorted(letterWeights.items(), key=lambda item: item[1], reverse=True)}
 # print(lettersWeightsSorted)
 """
 # create a dict of words from allWordsSorted with scores as values
 """
-# word_scores = dict(map(lambda w: (w, calculateScore(w)), allWordsSorted))
+# word_scores = dict(tqdm(map(lambda w: (w, calculateScore(w)), allWordsSorted)))
 # word_scores = {k: v for k, v in sorted(word_scores.items(), key=lambda item: item[1], reverse=True)}
-word_scores = loadWordScoresFromFile("allWordsScores.txt")
 # saveWordScores(word_scores, "allWordsScores.txt")
 # saveWordScoresCSV(word_scores, "allWordsScores.csv")
+word_scores = loadWordScoresFromFile("allWordsScores.txt")
 
 
 """
@@ -182,7 +183,7 @@ def getPossibleFirstWords(word_scores: dict) -> list:
     possibleFirstWords = []
     for word, score in word_scores.items():
         # making sure no duplicate letter in the word, and score is significant
-        if len(set(word)) == wordLength and score > 110.0:
+        if len(set(word)) == wordLength and score > 150.0:
             possibleFirstWords.append(word)
     return possibleFirstWords
 
@@ -213,20 +214,20 @@ first_word_scores = [word_scores[word] for word in first_word_choices]
 """
 Create firstword-secondword word pairs with max info gain(score)
 """
-# word_pair_choices = []
-# for first_word, first_word_score in zip(first_word_choices, first_word_scores):
-#     second_word, second_word_score = findSecondWord(first_word, word_scores)
-#     # print(f"The second word is {second_word}")
-#     word_pair_choices.append((first_word, second_word, first_word_score, second_word_score, first_word_score + second_word_score))
+word_pair_choices = []
+for first_word, first_word_score in zip(first_word_choices, first_word_scores):
+    second_word, second_word_score = findSecondWord(first_word, word_scores)
+    # print(f"The second word is {second_word}")
+    word_pair_choices.append((first_word, second_word, first_word_score, second_word_score, first_word_score + second_word_score))
 
-# # sort the word pairs by 4th element (first_word_score + second_word_score)
-# word_pair_choices = sorted(word_pair_choices, key=lambda item: item[4], reverse=True)
-# for entry in word_pair_choices:
-#     print(f"{entry[0]} - {entry[1]} - {entry[2]:.2f} - {entry[3]:.2f} - {entry[4]:.2f}")
+# sort the word pairs by 4th element (first_word_score + second_word_score)
+word_pair_choices = sorted(word_pair_choices, key=lambda item: item[4], reverse=True)
+for entry in word_pair_choices:
+    print(f"{entry[0]} - {entry[1]} - {entry[2]:.2f} - {entry[3]:.2f} - {entry[4]:.2f}")
 
 
-# save top 50 pairs to a CSV file
-# saveTopPairsTOCSV(word_pair_choices[:50], "top_word_pairs.csv")
+# save top 100 pairs to a CSV file
+saveTopPairsTOCSV(word_pair_choices[:100], "top_word_pairs.csv")
 
 """
 Possible first two words are TALES and CORNY
