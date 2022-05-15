@@ -75,6 +75,48 @@ def createBarplots(freq: np.array) -> None:
         plt.show()
 
 
+def getPosFreqScore(word: str, letterPosFreqScores: np.array) -> float:
+    """
+    Return the positional frequency score of letters in a word
+    """
+    posFreqScore = 0
+    for idx, letter in enumerate(word):
+        # convert the letter to lowercase
+        letter = letter.lower()
+        # convert the letter to value of 0 - 25
+        letter = ord(letter) - ord('a')
+        # increment the score
+        posFreqScore += letterPosFreqScores[idx][letter]
+    return posFreqScore
+
+def getAppearFreqScore(word: str, letterAppearFreqScores: np.array) -> float:
+    """
+    Return the appear frequency score of letters in a word
+    """
+    appearFreqScore = 0
+    for letter in word:
+        # convert the letter to lowercase
+        letter = letter.lower()
+        # convert the letter to value of 0 - 25
+        letter = ord(letter) - ord('a')
+        # increment the score
+        appearFreqScore += letterAppearFreqScores[0][letter]
+    return appearFreqScore
+
+def getRelativePosFreqScores(word: str, letterPosFreqScores: np.array) -> float:
+    """
+    Return the relative positional frequency score of letters in a word
+    """
+    relativePosFreqScore = 0
+    for idx, letter in enumerate(word):
+        # convert the letter to lowercase
+        letter = letter.lower()
+        # convert the letter to value of 0 - 25
+        letter = ord(letter) - ord('a')
+        # increment the score
+        relativePosFreqScore += (letterPosFreqScores[idx][letter] / letterPosFreqScores[:, letter].sum()) * 20
+    return relativePosFreqScore
+
 def calculateScore(word: str) -> float:
     """
     Calculate the score of a word
@@ -84,39 +126,16 @@ def calculateScore(word: str) -> float:
     letterAppearFreqScores = pd.read_csv('letter_total_weights.csv')
 
     letterPosFreqScores = letterPosFreqScores.values
-    posFreqScore = 0
-    for idx, letter in enumerate(word):
-        # convert the letter to lowercase
-        letter = letter.lower()
-        # convert the letter to value of 0 - 25
-        letter = ord(letter) - ord('a')
-        # increment the score
-        posFreqScore += letterPosFreqScores[idx][letter]    
-
     letterAppearFreqScores = letterAppearFreqScores.values
-    appearFreqScore = 0
-    for letter in word:
-        # convert the letter to lowercase
-        letter = letter.lower()
-        # convert the letter to value of 0 - 25
-        letter = ord(letter) - ord('a')
-        # increment the score
-        appearFreqScore += letterAppearFreqScores[0][letter]
 
+    posFreqScore = getPosFreqScore(word, letterPosFreqScores)
+    appearFreqScore = getAppearFreqScore(word, letterAppearFreqScores)
     relativePosFreqScore = 0
-    for idx, letter in enumerate(word):
-        # convert the letter to lowercase
-        letter = letter.lower()
-        # convert the letter to value of 0 - 25
-        letter = ord(letter) - ord('a')
-        # letterPosFreqScores[idx][letter] divided by sum(letterPosFreqScores[:, letter])
-        relativePosFreqScore += (letterPosFreqScores[idx][letter] / letterPosFreqScores[:, letter].sum()) * 20
-        # print(chr(letter + ord('a')), letterPosFreqScores[idx][letter], letterPosFreqScores[:, letter].sum(), relativePosFreqScore)
+    # relativePosFreqScore = getRelativePosFreqScores(word, letterPosFreqScores)
 
-    # print(word, relativePosFreqScore)
     return posFreqScore + appearFreqScore + relativePosFreqScore 
 
-print(calculateScore("gitch"))
+# print(calculateScore("gitch"))
 
 def saveWordScores(word_scores: dict, filename: str) -> None:
     # save all word scores to a file
@@ -145,22 +164,22 @@ def saveWordScoresCSV(word_scores: dict, filename: str) -> None:
         df = pd.DataFrame(word_scores_array, columns=headerList)
         df.to_csv(f, index=False)
 
-# allWordsSorted = open("allFiveLetterWords.txt").read().splitlines()
-# freq = createFrequencyTable(allWordsSorted)
+allWordsSorted = open("allFiveLetterWords.txt").read().splitlines()
+freq = createFrequencyTable(allWordsSorted)
 """
 # count frequeuncy table to weighted frequency table 
 # (probablity of appearance at a particular position in a word)
 """
-# freq_weights = (freq / freq.sum(axis=1, keepdims=True)) * 100
+freq_weights = (freq / freq.sum(axis=1, keepdims=True)) * 100
 # saveLetterFreqWeightsCSV(freq_weights, "weighted_freqs_letters_positions.csv")
 
 """
 # calculate the summed weights of each letter 
 # (probability of appearance in a word)
 """
-# letterWeights =  getLetterSummedWeights(freq_weights)
+letterWeights =  getLetterSummedWeights(freq_weights)
 # saveLetterTotalWeightsCSV(letterWeights, "letter_total_weights.csv")
-# lettersWeightsSorted = {k:v for k, v in sorted(letterWeights.items(), key=lambda item: item[1], reverse=True)}
+lettersWeightsSorted = {k:v for k, v in sorted(letterWeights.items(), key=lambda item: item[1], reverse=True)}
 # print(lettersWeightsSorted)
 """
 # create a dict of words from allWordsSorted with scores as values
@@ -227,7 +246,7 @@ for entry in word_pair_choices:
 
 
 # save top 100 pairs to a CSV file
-saveTopPairsTOCSV(word_pair_choices[:100], "top_word_pairs.csv")
+# saveTopPairsTOCSV(word_pair_choices[:100], "top_word_pairs.csv")
 
 """
 Possible first two words are TALES and CORNY
