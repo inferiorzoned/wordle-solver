@@ -1,4 +1,5 @@
 from distutils.log import info
+from fcntl import LOCK_WRITE
 import sys
 
 sys.path.append('../helper')
@@ -320,6 +321,7 @@ class WordleSolver:
         """
         : param answerWord: the answer word
         """
+        answerWord = answerWord.lower()
         self.guessesTaken = set()
         self.attemptsTaken = 0
         # start with a fixed first word 
@@ -368,9 +370,9 @@ class WordleSolver:
         if self.attemptsTaken == 1:
             self.guessesTaken.add(Config.firstWord)
             return Config.firstWord
-        elif self.attemptsTaken == 2:
-            self.guessesTaken.add(Config.secondWord)
-            return Config.secondWord
+        # elif self.attemptsTaken == 2:
+        #     self.guessesTaken.add(Config.secondWord)
+        #     return Config.secondWord
         bestWord = self.__getBestWord()
         self.guessesTaken.add(bestWord)
         return bestWord
@@ -396,13 +398,13 @@ solver = WordleSolver()
 """
 testing the solver
 """
-# answerWord = "frape"
-# solver.testSolver(answerWord)
+answerWord = "frape"
+solver.testSolver(answerWord)
 
 """
 running the solver
 """
-runSolver(solver)
+# runSolver(solver)
 
 
 
