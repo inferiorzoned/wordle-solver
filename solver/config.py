@@ -3,6 +3,6 @@ class Config:
     allowedNumberOfAttempts = 6
     wordLength = 5
     firstWord = "tones"
-    secondWord = "parly"
+    # secondWord = "parly"
     debugMode = 0
     
