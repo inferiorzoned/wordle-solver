@@ -394,15 +394,15 @@ def runSolver(solver):
 
 solver = WordleSolver()
 """
-testing the solver# runSolver(solver)
+testing the solver
 """
-answerWord = "witch"
-solver.testSolver(answerWord)
+# answerWord = "frape"
+# solver.testSolver(answerWord)
 
 """
 running the solver
 """
-# runSolver(solver)
+runSolver(solver)
 
 
 
