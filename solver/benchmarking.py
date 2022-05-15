@@ -1,6 +1,7 @@
 from wordle_solver import WordleSolver
 from config import Config
 import csv
+from tqdm import tqdm
 
 allWordleWords = open("included.txt").read().splitlines()
 
@@ -9,7 +10,7 @@ def singleWordPairAnalysis(saveToFile = False):
     attemptCount = 0
     attemptSum = 0
     guessedWithinAllowedAttempts = 0
-    for word in allWordleWords:
+    for word in tqdm(allWordleWords):
         solver = WordleSolver()
         solver.testSolver(word)
         wordAttemptDict[word] = solver.attemptsTaken
@@ -17,6 +18,9 @@ def singleWordPairAnalysis(saveToFile = False):
         attemptCount += 1
         if solver.attemptsTaken <= Config.allowedNumberOfAttempts:
             guessedWithinAllowedAttempts += 1
+        else:
+            print(f"{attemptCount - guessedWithinAllowedAttempts} words could not be guessed")
+            print(f"{word} took {solver.attemptsTaken} attempts")
     print(wordAttemptDict)
     print(f"Total number of attempts are {attemptSum}")
     print(f"Number of wordle words are {attemptCount}")

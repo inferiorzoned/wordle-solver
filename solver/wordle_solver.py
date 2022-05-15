@@ -120,8 +120,11 @@ class WordleSolver:
                 return previousBestWord
             bestWord = max(wordScores, key = lambda k : wordScores[k])
             # take lowest scoring in third attempt (to gain low score letter info)
-            # if self.attemptsTaken == 3:
-            #     bestWord = min(wordScores, key = lambda k : wordScores[k])
+            if self.attemptsTaken == 3:
+                # sort the wordScores
+                sortedWordScores = sorted(wordScores, key = lambda k : wordScores[k])
+                # take the median of the sorted list
+                bestWord = sortedWordScores[len(sortedWordScores) // 2]
         return bestWord
 
     def getBestIfAlreadyGuessed(self, previousBestWord: str, wordScores: dict) -> str:
@@ -157,7 +160,7 @@ class WordleSolver:
             tempExisting = self.existingLetters
             self.positionalLetters = [None] * Config.wordLength
             self.existingLetters = ""
-            self.existingLetters += getMostScoredLetter(tempExisting)
+            # self.existingLetters += getMostScoredLetter(tempExisting)
             if Config.debugMode > 0:
                 print(self)
             self.infoGainAtSecondAttempt = True
@@ -188,7 +191,11 @@ class WordleSolver:
             allValidWords = self.__getHelpFromHelper()
             if len(allValidWords) > 0:
                 wordScores = self.scoreTheWords(allValidWords)
-                bestWord = max(wordScores, key = lambda k : wordScores[k])
+                # bestWord = max(wordScores, key = lambda k : wordScores[k])
+                # sort the wordScores
+                sortedWordScores = sorted(wordScores, key = lambda k : wordScores[k])
+                # take the median of the sorted list
+                bestWord = sortedWordScores[len(sortedWordScores) // 2]
                 if Config.debugMode > 0:
                     print(wordScores)
                     print(f"Best word is {bestWord.upper()} in attempt no {self.attemptsTaken}")
@@ -288,11 +295,11 @@ class WordleSolver:
         : param foundAnswer: the word found
         : param answerWord: the answer word
         """
-        if foundAnswer and self.attemptsTaken <= Config.allowedNumberOfAttempts:
-            print(f"The correct answer is {answerWord}, number of attempts taken: {self.attemptsTaken}")
-        else:
-            print("The answer is not found, correct answer is {}".format(answerWord))
-            print(f"Number of attempts taken: {self.attemptsTaken}")
+        # if foundAnswer and self.attemptsTaken <= Config.allowedNumberOfAttempts:
+        #     print(f"The correct answer is {answerWord}, number of attempts taken: {self.attemptsTaken}")
+        # else:
+        #     print("The answer is not found, correct answer is {}".format(answerWord))
+        #     print(f"Number of attempts taken: {self.attemptsTaken}")
         pass
 
     def analyzeFixedGuess(self, guessWord, answerWord) -> bool: 
@@ -390,12 +397,12 @@ solver = WordleSolver()
 testing the solver# runSolver(solver)
 """
 answerWord = "witch"
-solver.testSolver(answerWord)
+# solver.testSolver(answerWord)
 
 """
 running the solver
 """
-# runSolver(solver)
+runSolver(solver)
 
 
 
