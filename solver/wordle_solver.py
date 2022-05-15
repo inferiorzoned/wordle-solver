@@ -1,5 +1,4 @@
 from distutils.log import info
-from fcntl import LOCK_WRITE
 import sys
 
 sys.path.append('../helper')
@@ -120,12 +119,9 @@ class WordleSolver:
             if len(wordScores) == 0:
                 return previousBestWord
             bestWord = max(wordScores, key = lambda k : wordScores[k])
-            # take lowest scoring in third attempt (to gain low score letter info)
-            if self.attemptsTaken == 3:
-                # sort the wordScores
-                sortedWordScores = sorted(wordScores, key = lambda k : wordScores[k])
-                # take the median of the sorted list
-                bestWord = sortedWordScores[len(sortedWordScores) // 2]
+            if self.attemptsTaken == 5:
+                # take lowest scoring in fifth attempt (to gain low score letter info)
+                bestWord = min(wordScores, key = lambda k : wordScores[k])
         return bestWord
 
     def getBestIfAlreadyGuessed(self, previousBestWord: str, wordScores: dict) -> str:
@@ -139,9 +135,6 @@ class WordleSolver:
         while bestWord in self.guessesTaken:
             del wordScores[bestWord]
             bestWord = max(wordScores, key = lambda k : wordScores[k])
-            # take lowest scoring in third attempt (to gain low score letter info)
-            # if self.attemptsTaken == 3:
-            #     bestWord = min(wordScores, key = lambda k : wordScores[k])
             if Config.debugMode > 0:
                 print(wordScores)
                 print(f"Best word: {bestWord.upper()} in attempt no {self.attemptsTaken}")
@@ -165,7 +158,6 @@ class WordleSolver:
             if Config.debugMode > 0:
                 print(self)
             self.infoGainAtSecondAttempt = True
-            # bestWord = self.__getBestWord()
             allValidWords = self.__getHelpFromHelper()
             if len(allValidWords) > 0:
                 wordScores = self.scoreTheWords(allValidWords)
@@ -192,11 +184,7 @@ class WordleSolver:
             allValidWords = self.__getHelpFromHelper()
             if len(allValidWords) > 0:
                 wordScores = self.scoreTheWords(allValidWords)
-                # bestWord = max(wordScores, key = lambda k : wordScores[k])
-                # sort the wordScores
-                sortedWordScores = sorted(wordScores, key = lambda k : wordScores[k])
-                # take the median of the sorted list
-                bestWord = sortedWordScores[len(sortedWordScores) // 2]
+                bestWord = max(wordScores, key = lambda k : wordScores[k])
                 if Config.debugMode > 0:
                     print(wordScores)
                     print(f"Best word is {bestWord.upper()} in attempt no {self.attemptsTaken}")
@@ -217,7 +205,6 @@ class WordleSolver:
             # self.existingLetters += getMostScoredVowel(tempExisting)
             if Config.debugMode > 0:
                 print(self)
-            # bestWord = self.__getBestWord() or bestWord
             allValidWords = self.__getHelpFromHelper()
             if len(allValidWords) > 0:
                 wordScores = self.scoreTheWords(allValidWords)
@@ -260,7 +247,7 @@ class WordleSolver:
                 allValidWords = self.__getHelpFromHelper()
                 if len(allValidWords) > 0:
                     wordScores = self.scoreTheWords(allValidWords)
-                    # take lowest scoring in third attempt (to gain low score letter info)
+                    # take lowest scoring in fifth attempt (to gain low score letter info)
                     bestWord = min(wordScores, key = lambda k : wordScores[k])
                     if Config.debugMode > 0:
                         print(wordScores)
@@ -321,7 +308,6 @@ class WordleSolver:
         """
         : param answerWord: the answer word
         """
-        answerWord = answerWord.lower()
         self.guessesTaken = set()
         self.attemptsTaken = 0
         # start with a fixed first word 
@@ -372,7 +358,7 @@ class WordleSolver:
             return Config.firstWord
         # elif self.attemptsTaken == 2:
         #     self.guessesTaken.add(Config.secondWord)
-        #     return Config.secondWord
+            return Config.secondWord
         bestWord = self.__getBestWord()
         self.guessesTaken.add(bestWord)
         return bestWord
@@ -396,7 +382,7 @@ def runSolver(solver):
 
 solver = WordleSolver()
 """
-testing the solver
+testing the solver# runSolver(solver)
 """
 answerWord = "frape"
 solver.testSolver(answerWord)
