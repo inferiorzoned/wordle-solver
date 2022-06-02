@@ -5,7 +5,8 @@ letterPosFreqScoresCSV = pd.read_csv('../scorer/scoring utils/weighted_freqs_let
 # letterAppearFreqScores: 26 columns (letters)
 letterAppearFreqScoresCSV = pd.read_csv('../scorer/scoring utils/letter_total_weights.csv')
 # allWordsScores: 12972 rows (words), 2 columns (scores)
-allWordsScoresCSV = pd.read_csv('../scorer/scoring utils/all_words_scores.csv')
+# allWordsScoresCSV = pd.read_csv('../scorer/scoring utils/all_words_scores.csv')
+allWordsScoresCSV = pd.read_csv('../scorer/scoring utils/all_words_scores_wordle.csv')
 
 def precalculateScores():
     global allWordsScoresDict

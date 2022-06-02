@@ -153,7 +153,7 @@ class WordleSolver:
             tempPositional = self.positionalLetters
             tempExisting = self.existingLetters
             self.positionalLetters = [None] * Config.wordLength
-            self.existingLetters = ""
+            # self.existingLetters = ""
             # self.existingLetters += getMostScoredLetter(tempExisting)
             if Config.debugMode > 0:
                 print(self)
@@ -208,7 +208,7 @@ class WordleSolver:
             allValidWords = self.__getHelpFromHelper()
             if len(allValidWords) > 0:
                 wordScores = self.scoreTheWords(allValidWords)
-                bestWord = max(wordScores, key = lambda k : wordScores[k])
+                bestWord = min(wordScores, key = lambda k : wordScores[k])
                 if Config.debugMode > 0:
                     print(wordScores)
                     print(f"Best word is {bestWord.upper()} in attempt no {self.attemptsTaken}")
@@ -384,8 +384,8 @@ solver = WordleSolver()
 """
 testing the solver# runSolver(solver)
 """
-answerWord = "frape"
-solver.testSolver(answerWord)
+answerWord = "savor"
+# solver.testSolver(answerWord)
 
 """
 running the solver

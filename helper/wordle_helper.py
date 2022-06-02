@@ -2,7 +2,9 @@ from tabnanny import verbose
 from dictionary_api import DictionaryAPI
 from typing import Union
 
-allWordsSorted = open("../helper/allFiveLetterWords.txt").read().splitlines()
+# allWordsSorted = open("../helper/allFiveLetterWords.txt").read().splitlines()
+allWordsSorted = open("../helper/allWordleWords.txt").read().splitlines()
+
 def existsInWordList(word):
     """
     Check whether the word exists in sorted allFiveLetterWords list
